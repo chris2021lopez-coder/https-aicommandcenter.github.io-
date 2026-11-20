@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI MONEY COMMAND CENTER // STANDALONE TREASURY OS</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Orbitron & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        orbitron: ['Orbitron', 'sans-serif'],
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+                    },
+                    colors: {
+                        obsidian: '#050505',
+                        neon: {
+                            green: '#39FF14',
+                            blue: '#00F3FF',
+                            purple: '#BC13FE',
+                            orange: '#FF5F1F',
+                        }
+                    },
+                    animation: {
+                        'spin-slow': 'spin 16s linear infinite',
+                        'spin-reverse-slower': 'spin-reverse 24s linear infinite',
+                        'pulse-core': 'pulseCore 4s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        'spin-reverse': {
+                            '0%': { transform: 'rotate(360deg)' },
+                            '100%': { transform: 'rotate(0deg)' },
+                        },
+                        pulseCore: {
+                            '0%, 100%': { transform: 'scale(1)', opacity: '0.88' },
+                            '50%': { transform: 'scale(1.04)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --neon-green: #39FF14;
+            --neon-blue: #00F3FF;
+            --neon-purple: #BC13FE;
+            --neon-orange: #FF5F1F;
+            --bg-black: #050505;
+            --active-accent: #39FF14;
+            --active-rgb: 57, 255, 20;
+        }
+
+        body {
+            background-color: var(--bg-black);
+            color: #F3F4F6;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(57, 255, 20, 0.06) 0%, transparent 50%),
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 100% 100%, 36px 36px, 36px 36px;
+        }
+
+        .font-orbitron { font-family: 'Orbitron', sans-serif; }
+
+        /* Glassmorphism Surfaces */
+        .glass {
+            background: rgba(13, 16, 21, 0.72);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.65);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.025);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.22s ease;
+        }
+
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.045);
+            border-color: rgba(255, 255, 255, 0.18);
+            transform: translateY(-2px);
+        }
+
+        /* Dynamic Accent Helpers */
+        .accent-text { color: var(--active-accent); }
+        .accent-border { border-color: var(--active-accent); }
+        .accent-bg-soft { background-color: rgba(var(--active-rgb), 0.12); }
+        .accent-glow-text { text-shadow: 0 0 14px rgba(var(--active-rgb), 0.65); }
+        .accent-glow-box { box-shadow: 0 0 18px rgba(var(--active-rgb), 0.25); }
+
+        /* Central Hub Reactor */
+        .central-hub {
+            position: relative;
+            background: radial-gradient(circle, rgba(57, 255, 20, 0.16) 0%, rgba(0, 243, 255, 0.08) 45%, transparent 72%);
+            box-shadow: 0 0 50px rgba(57, 255, 20, 0.14);
+        }
+
+        /* BUG FIX #1: View section visibility without breaking flex centering */
+        .view-section { display: none; }
+        .view-section.active { display: block; }
+        #main-hub.view-section.active { display: flex; }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.16); border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--neon-green); }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Custom Cyber Checkbox */
+        .cyber-check {
+            appearance: none;
+            width: 1.15rem;
+            height: 1.15rem;
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            border-radius: 0.3rem;
+            background: rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+            position: relative;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .cyber-check:checked {
+            background-color: var(--active-accent);
+            border-color: var(--active-accent);
+            box-shadow: 0 0 10px rgba(var(--active-rgb), 0.6);
+        }
+        .cyber-check:checked::after {
+            content: '✓';
+            position: absolute;
+            color: #050505;
+            font-weight: 900;
+            font-size: 0.75rem;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+<body class="flex flex-col md:flex-row min-h-screen overflow-x-hidden">
+
+    <!-- DESKTOP LEFT SIDEBAR -->
+    <aside class="hidden md:flex md:w-64 lg:w-72 flex-col glass border-r border-white/10 p-5 justify-between sticky top-0 h-screen z-30 shrink-0">
+        <div>
+            <!-- Brand Identity -->
+            <button onclick="showHub()" class="w-full text-left flex items-center gap-3 mb-7 px-2 group">
+                <div class="w-10 h-10 rounded-xl bg-neon-green/10 border border-neon-green/50 flex items-center justify-center shadow-[0_0_15px_rgba(57,255,20,0.28)] group-hover:scale-105 transition-transform">
+                    <svg class="w-5 h-5 text-neon-green" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="font-orbitron font-bold text-sm tracking-widest text-white group-hover:text-neon-green transition-colors">AI MONEY</div>
+                    <div class="text-[10px] font-mono text-gray-400 tracking-wider">COMMAND CENTER // OS</div>
+                </div>
+            </button>
+
+            <!-- Central Hub Button -->
+            <button id="desktop-hub-btn" onclick="showHub()" class="w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-orbitron tracking-wider transition-all mb-6 bg-neon-green/15 text-neon-green border border-neon-green/40 shadow-[0_0_15px_rgba(57,255,20,0.15)]">
+                <span class="flex items-center gap-2.5">
+                    <span class="w-2 h-2 rounded-full bg-neon-green animate-ping"></span>
+                    TREASURY HUB
+                </span>
+                <span class="text-[10px] font-mono opacity-75">CORE</span>
+            </button>
+
+            <!-- 7 Departments Navigation -->
+            <div class="text-[10px] font-orbitron text-gray-500 uppercase tracking-widest px-3 mb-2.5 flex items-center justify-between">
+                <span>Revenue Sectors</span>
+                <span class="font-mono text-gray-600">07</span>
+            </div>
+            <nav id="desktop-dept-list" class="space-y-1.5">
+                <!-- Dynamically rendered -->
+            </nav>
+        </div>
+
+        <!-- Standalone LocalStorage & Stream Status Footer -->
+        <div class="pt-4 border-t border-white/10 space-y-2.5">
+            <button onclick="openConnectorModal()" class="w-full glass-card p-3 rounded-xl flex items-center justify-between text-left group hover:border-neon-green/50">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <span id="sidebar-status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse shrink-0"></span>
+                    <div class="truncate">
+                        <div class="text-xs font-semibold text-gray-200 group-hover:text-neon-green transition-colors">Data Stream</div>
+                        <div id="sidebar-status-text" class="text-[10px] font-mono text-gray-400 truncate">--- Awaiting Input</div>
+                    </div>
+                </div>
+                <span class="text-[10px] font-orbitron text-neon-green px-2 py-1 rounded bg-neon-green/10 border border-neon-green/30 shrink-0">BIND</span>
+            </button>
+            <div class="flex items-center justify-between px-2 text-[10px] font-mono text-gray-500">
+                <span>STANDALONE // NO SDK</span>
+                <span class="text-neon-green/80">LOCAL_STORAGE</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- BUG FIX #2: COMPLETE MOBILE BOTTOM NAVIGATION BAR (ALL 7 DEPARTMENTS + HUB) -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 glass border-t border-white/15 z-40 px-2 py-2 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+        <button id="mobile-hub-btn" onclick="showHub()" class="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl font-orbitron text-[10px] font-bold tracking-wider bg-neon-green/20 text-neon-green border border-neon-green/50">
+            <span>HUB</span>
+        </button>
+        <div id="mobile-dept-list" class="flex items-center gap-1.5 shrink-0">
+            <!-- All 7 department pills injected dynamically -->
+        </div>
+    </nav>
+
+    <!-- MAIN VIEWPORT -->
+    <main class="flex-1 flex flex-col min-w-0 pb-24 md:pb-8">
+        
+        <!-- Top Global Telemetry Bar -->
+        <header class="w-full px-4 sm:px-8 py-3.5 border-b border-white/10 flex flex-wrap items-center justify-between gap-3 bg-black/50 backdrop-blur-md sticky top-0 z-20">
+            <div class="flex items-center gap-3">
+                <span class="md:hidden font-orbitron font-bold text-xs tracking-widest text-neon-green">AI MONEY OS</span>
+                <div class="hidden sm:flex items-center gap-2 text-xs font-mono text-gray-400">
+                    <span class="text-gray-600">SECTOR //</span>
+                    <span id="top-breadcrumb" class="text-white font-semibold">TREASURY_CORE_HUB</span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2.5 sm:gap-3">
+                <!-- Live Clock -->
+                <div class="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/10 font-mono text-[11px] text-gray-300">
+                    <span class="w-1.5 h-1.5 rounded-full bg-neon-blue"></span>
+                    <span id="live-system-clock">--:--:--</span>
+                </div>
+
+                <!-- Data Stream Status Pill -->
+                <button onclick="openConnectorModal()" class="glass-card px-3.5 py-1.5 rounded-full text-xs font-mono flex items-center gap-2 border border-white/15 hover:border-neon-green/50 cursor-pointer">
+                    <span id="header-stream-dot" class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+                    <span id="header-stream-badge" class="text-[11px] tracking-wider text-gray-200">STREAM: STANDBY</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- =========================================================
+             VIEW 1: CENTRAL HUB (TREASURY CORE)
+        ========================================================== -->
+        <section id="main-hub" class="view-section active flex-1 flex-col items-center justify-center px-4 sm:px-8 py-8 max-w-7xl mx-auto w-full">
+            
+            <!-- Header Title -->
+            <div class="text-center max-w-2xl mb-6">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neon-green/10 border border-neon-green/30 text-[10px] font-orbitron tracking-widest text-neon-green mb-3">
+                    <span>ZERO FAKE DATA // STANDALONE ARCHITECTURE</span>
+                </div>
+                <h1 class="font-orbitron text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white mb-2" style="text-shadow: 0 0 24px rgba(57, 255, 20, 0.35);">
+                    AI MONEY COMMAND CENTER
+                </h1>
+                <p class="text-xs sm:text-sm text-gray-400">
+                    Autonomous revenue orchestration across 7 financial sectors. Connect live REST JSON streams or inject real-time figures locally.
+                </p>
+            </div>
+
+            <!-- Global 'No Fake Data' Treasury Status Strip -->
+            <div class="w-full max-w-4xl glass rounded-2xl p-4 sm:p-5 mb-8 border border-white/10">
+                <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-3 border-b border-white/10">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-neon-green"></span>
+                        <span class="font-orbitron text-xs tracking-widest text-gray-300 uppercase">Global Treasury Telemetry</span>
+                    </div>
+                    <button onclick="openConnectorModal()" class="text-[11px] font-mono text-neon-blue hover:underline flex items-center gap-1">
+                        <span>[CONFIGURE DATA STREAM]</span>
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-black/40 rounded-xl p-3.5 border border-white/5">
+                        <div class="text-[10px] font-orbitron text-gray-400 uppercase">Net Liquidity / Cash</div>
+                        <div id="global-treasury-cash" class="font-orbitron text-xl sm:text-2xl font-bold text-white mt-1">---</div>
+                        <div id="global-treasury-cash-sub" class="text-[10px] font-mono text-amber-400 mt-1">Awaiting Stream</div>
+                    </div>
+                    <div class="bg-black/40 rounded-xl p-3.5 border border-white/5">
+                        <div class="text-[10px] font-orbitron text-gray-400 uppercase">Active Pipeline Value</div>
+                        <div id="global-treasury-pipe" class="font-orbitron text-xl sm:text-2xl font-bold text-white mt-1">---</div>
+                        <div id="global-treasury-pipe-sub" class="text-[10px] font-mono text-amber-400 mt-1">Awaiting Stream</div>
+                    </div>
+                    <div class="bg-black/40 rounded-xl p-3.5 border border-white/5">
+                        <div class="text-[10px] font-orbitron text-gray-400 uppercase">Bound Sector Streams</div>
+                        <div id="global-bound-count" class="font-orbitron text-xl sm:text-2xl font-bold text-neon-green mt-1">0 / 7</div>
+                        <div class="text-[10px] font-mono text-gray-400 mt-1">LocalStorage Synced</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pulsing NET_LINK / TREASURY CORE Reactor -->
+            <div class="central-hub w-60 h-60 sm:w-72 sm:h-72 rounded-full flex items-center justify-center mb-10 animate-pulse-core select-none">
+                <!-- Concentric Rotating Neon Rings -->
+                <div class="absolute inset-0 rounded-full border border-dashed border-neon-green/45 animate-spin-slow"></div>
+                <div class="absolute inset-5 rounded-full border-2 border-neon-blue/35 animate-spin-reverse-slower" style="border-left-color: transparent; border-right-color: transparent;"></div>
+                <div class="absolute inset-10 rounded-full border border-neon-purple/40 animate-spin-slow" style="border-top-color: transparent;"></div>
+                
+                <!-- Reactor Center -->
+                <div class="relative z-10 w-36 h-36 sm:w-40 sm:h-40 rounded-full glass border border-neon-green/50 flex flex-col items-center justify-center text-center shadow-[0_0_30px_rgba(57,255,20,0.25)]">
+                    <div class="text-[9px] font-orbitron tracking-widest text-neon-green animate-pulse mb-1">CORE ACTIVE</div>
+                    <div class="font-orbitron text-lg sm:text-xl font-black tracking-wider text-white">NET_LINK</div>
+                    <div class="text-[10px] font-mono text-neon-blue mt-0.5">TREASURY CORE</div>
+                    <div id="hub-clock-mini" class="text-[9px] font-mono text-gray-400 mt-1.5">--:--:--</div>
+                </div>
+            </div>
+
+            <!-- Interactive 7-Department Rapid-Access Command Grid -->
+            <div class="w-full max-w-6xl">
+                <div class="flex items-center justify-between mb-3 px-1">
+                    <h2 class="font-orbitron text-xs tracking-widest text-gray-400 uppercase">7 Financial Command Sectors</h2>
+                    <span class="text-[10px] font-mono text-gray-500">CLICK SECTOR TO INSPECT TELEMETRY</span>
+                </div>
+                <div id="hub-sector-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- All 7 department cards rendered dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- =========================================================
+             VIEW 2: DYNAMIC PER-DEPARTMENT DASHBOARD
+        ========================================================== -->
+        <section id="dept-dashboard" class="view-section flex-1 px-4 sm:px-8 py-6 max-w-7xl mx-auto w-full">
+            
+            <!-- Department Header -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center pb-6 mb-6 border-b border-white/10 gap-4">
+                <div>
+                    <button onclick="showHub()" class="inline-flex items-center gap-1.5 text-xs font-mono text-gray-400 hover:text-white mb-2 transition-colors">
+                        <span>← BACK TO TREASURY CORE</span>
+                    </button>
+                    <div class="flex items-center gap-3">
+                        <span id="dept-number-badge" class="px-2.5 py-1 rounded-lg font-orbitron text-xs font-bold accent-bg-soft accent-text border accent-border">01</span>
+                        <h2 id="dept-title" class="font-orbitron text-2xl sm:text-4xl font-black tracking-tight uppercase accent-text accent-glow-text">
+                            DEPARTMENT
+                        </h2>
+                    </div>
+                    <p id="dept-tagline" class="text-xs sm:text-sm text-gray-400 mt-1">Financial Sector Telemetry</p>
+                </div>
+
+                <!-- Department Stream Controls -->
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <button id="dept-refresh-btn" onclick="refreshCurrentDeptStream()" class="hidden px-3.5 py-2 rounded-xl glass-card text-xs font-mono text-neon-blue border border-neon-blue/40 hover:bg-neon-blue/10 transition-all">
+                        ↻ FETCH LIVE API
+                    </button>
+                    <button onclick="openConnectorModal()" class="px-4 py-2 rounded-xl font-orbitron text-xs font-bold tracking-wider accent-bg-soft accent-text border accent-border accent-glow-box hover:opacity-85 transition-all">
+                        ⚡ CONNECT DATA STREAM
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Bento Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- 1. Tailored Financial Metric Cards (Honest '---' Default or Live Bound Data) -->
+                <div class="lg:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <!-- Metric 1 -->
+                    <div class="glass-card p-5 rounded-2xl border-l-4 accent-border flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-2">
+                            <span id="m1-label" class="text-[11px] font-orbitron text-gray-400 uppercase tracking-wider">METRIC 01</span>
+                            <span class="text-[10px] font-mono text-gray-600">KPI_01</span>
+                        </div>
+                        <div id="m1-value" class="font-orbitron text-2xl sm:text-3xl font-bold text-white tracking-tight my-1.5 break-all">---</div>
+                        <div class="pt-2 border-t border-white/5 flex items-center justify-between">
+                            <span id="m1-status" class="text-[11px] font-mono accent-text">Awaiting Input</span>
+                            <span id="m1-source-tag" class="text-[9px] font-mono text-gray-500">EMPTY</span>
+                        </div>
+                    </div>
+
+                    <!-- Metric 2 -->
+                    <div class="glass-card p-5 rounded-2xl border-l-4 accent-border flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-2">
+                            <span id="m2-label" class="text-[11px] font-orbitron text-gray-400 uppercase tracking-wider">METRIC 02</span>
+                            <span class="text-[10px] font-mono text-gray-600">KPI_02</span>
+                        </div>
+                        <div id="m2-value" class="font-orbitron text-2xl sm:text-3xl font-bold text-white tracking-tight my-1.5 break-all">---</div>
+                        <div class="pt-2 border-t border-white/5 flex items-center justify-between">
+                            <span id="m2-status" class="text-[11px] font-mono accent-text">Awaiting Input</span>
+                            <span id="m2-source-tag" class="text-[9px] font-mono text-gray-500">EMPTY</span>
+                        </div>
+                    </div>
+
+                    <!-- Metric 3 -->
+                    <div class="glass-card p-5 rounded-2xl border-l-4 accent-border flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-2">
+                            <span id="m3-label" class="text-[11px] font-orbitron text-gray-400 uppercase tracking-wider">METRIC 03</span>
+                            <span class="text-[10px] font-mono text-gray-600">KPI_03</span>
+                        </div>
+                        <div id="m3-value" class="font-orbitron text-2xl sm:text-3xl font-bold text-white tracking-tight my-1.5 break-all">---</div>
+                        <div class="pt-2 border-t border-white/5 flex items-center justify-between">
+                            <span id="m3-status" class="text-[11px] font-mono accent-text">Awaiting Input</span>
+                            <span id="m3-source-tag" class="text-[9px] font-mono text-gray-500">EMPTY</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Tailored AI Agent Squad -->
+                <div class="glass p-5 rounded-2xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-orbitron text-xs tracking-widest text-gray-400 uppercase">AI Agent Squad</h3>
+                            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-gray-400">AUTONOMOUS</span>
+                        </div>
+                        <div id="dept-agents-container" class="space-y-3">
+                            <!-- Injected per department -->
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-[10px] font-mono text-gray-500">
+                        <span>EXECUTION_ENGINE</span>
+                        <span class="accent-text">LOCAL_STANDBY</span>
+                    </div>
+                </div>
+
+                <!-- 3. Persistent Task Checklist (Add / Toggle / Delete saved in localStorage) -->
+                <div class="glass p-5 rounded-2xl flex flex-col">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-orbitron text-xs tracking-widest text-gray-400 uppercase">Sector Directives</h3>
+                        <span id="dept-task-stats" class="text-[10px] font-mono px-2 py-0.5 rounded accent-bg-soft accent-text">0/0 DONE</span>
+                    </div>
+
+                    <form onsubmit="handleAddTask(event)" class="flex gap-2 mb-3">
+                        <input 
+                            type="text" 
+                            id="new-directive-input" 
+                            placeholder="Add financial directive..." 
+                            class="flex-1 bg-black/50 border border-white/15 rounded-xl px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-white/40"
+                        >
+                        <button type="submit" class="px-3.5 py-2 rounded-xl accent-bg-soft accent-text border accent-border font-orbitron text-xs font-bold hover:opacity-80">
+                            +
+                        </button>
+                    </form>
+
+                    <div id="dept-tasks-container" class="space-y-2 max-h-56 overflow-y-auto pr-1">
+                        <!-- Persistent tasks injected here -->
+                    </div>
+                </div>
+
+                <!-- 4. Interactive 3-Phase Workflow Pipeline Progress Controller -->
+                <div class="glass p-5 rounded-2xl lg:col-span-2 flex flex-col justify-between">
+                    <div>
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                            <div>
+                                <h3 class="font-orbitron text-xs tracking-widest text-gray-400 uppercase">3-Phase Execution Pipeline</h3>
+                                <p class="text-xs text-gray-500 mt-0.5">Select a phase below to update active sector pipeline state (saved automatically).</p>
+                            </div>
+                            <span id="pipeline-phase-label" class="text-[11px] font-mono px-3 py-1 rounded-lg accent-bg-soft accent-text border accent-border">
+                                PHASE_01 ACTIVE
+                            </span>
+                        </div>
+
+                        <!-- 3-Phase Interactive Bar -->
+                        <div class="grid grid-cols-3 gap-3 my-5">
+                            <button onclick="setDepartmentPhase(1)" class="text-left group">
+                                <div id="phase-bar-1" class="h-3.5 rounded-full transition-all mb-2 bg-white/10"></div>
+                                <div id="phase-title-1" class="font-orbitron text-xs font-bold text-gray-300 group-hover:text-white">PHASE_01</div>
+                                <div id="phase-sub-1" class="text-[11px] font-mono text-gray-500">Data Ingestion</div>
+                            </button>
+                            <button onclick="setDepartmentPhase(2)" class="text-left group">
+                                <div id="phase-bar-2" class="h-3.5 rounded-full transition-all mb-2 bg-white/10"></div>
+                                <div id="phase-title-2" class="font-orbitron text-xs font-bold text-gray-300 group-hover:text-white">PHASE_02</div>
+                                <div id="phase-sub-2" class="text-[11px] font-mono text-gray-500">AI Optimization</div>
+                            </button>
+                            <button onclick="setDepartmentPhase(3)" class="text-left group">
+                                <div id="phase-bar-3" class="h-3.5 rounded-full transition-all mb-2 bg-white/10"></div>
+                                <div id="phase-title-3" class="font-orbitron text-xs font-bold text-gray-300 group-hover:text-white">PHASE_03</div>
+                                <div id="phase-sub-3" class="text-[11px] font-mono text-gray-500">Settlement & Yield</div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="p-3 rounded-xl bg-black/45 border border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
+                        <span class="text-gray-400">PIPELINE_NOTE: <span id="pipeline-description" class="text-gray-200">Initializing sector telemetry...</span></span>
+                        <span class="accent-text">PERSISTENCE: ON</span>
+                    </div>
+                </div>
+
+                <!-- 5. Live Timestamped System Activity & Notifications Log -->
+                <div class="glass p-5 rounded-2xl lg:col-span-3">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-orbitron text-xs tracking-widest text-gray-400 uppercase">System Activity & Notifications</h3>
+                        <div class="flex items-center gap-2">
+                            <button onclick="runDiagnosticPing()" class="text-[11px] font-mono px-2.5 py-1 rounded bg-white/5 hover:bg-white/10 text-gray-300 transition-colors">
+                                + DIAGNOSTIC PING
+                            </button>
+                            <button onclick="clearActivityLogs()" class="text-[11px] font-mono px-2.5 py-1 rounded bg-white/5 hover:bg-red-500/20 text-gray-400 hover:text-red-300 transition-colors">
+                                CLEAR
+                            </button>
+                        </div>
+                    </div>
+                    <div id="activity-log-feed" class="bg-black/65 border border-white/10 rounded-xl p-4 font-mono text-xs space-y-2 max-h-44 overflow-y-auto">
+                        <!-- Live timestamped entries -->
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <!-- =========================================================
+         BUILT-IN DATA STREAM CONNECTOR MODAL (ZERO BASE44)
+    ========================================================== -->
+    <div id="connector-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+        <div class="glass border border-white/20 rounded-2xl max-w-xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
+                <div>
+                    <h3 class="font-orbitron text-base sm:text-lg font-bold text-white tracking-wider">DATA STREAM CONNECTOR</h3>
+                    <p class="text-[11px] font-mono text-neon-green">STANDALONE REST FETCH & LOCAL INJECTION // NO BASE44</p>
+                </div>
+                <button onclick="closeConnectorModal()" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/15 flex items-center justify-center text-gray-400 hover:text-white">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Target Selector -->
+            <div class="mb-4">
+                <label class="block text-[11px] font-orbitron text-gray-400 uppercase mb-1.5">Target Command Sector</label>
+                <select id="modal-sector-select" onchange="loadSectorIntoModal()" class="w-full bg-black/70 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs font-mono text-white focus:outline-none focus:border-neon-green">
+                    <!-- Populated with Global Treasury + all 7 departments -->
+                </select>
+            </div>
+
+            <!-- Mode Tabs -->
+            <div class="grid grid-cols-2 gap-2 p-1 rounded-xl bg-black/60 border border-white/10 mb-5">
+                <button id="tab-btn-manual" onclick="switchConnectorTab('manual')" class="py-2 rounded-lg font-orbitron text-xs font-bold bg-neon-green text-black transition-all">
+                    MANUAL LIVE INPUT
+                </button>
+                <button id="tab-btn-api" onclick="switchConnectorTab('api')" class="py-2 rounded-lg font-orbitron text-xs font-bold text-gray-400 hover:text-white transition-all">
+                    REST JSON API FETCH
+                </button>
+            </div>
+
+            <!-- TAB A: Manual Live Financial Input -->
+            <div id="connector-tab-manual" class="space-y-3.5">
+                <p class="text-xs text-gray-400">
+                    Inject your real business figures directly into local browser storage. Leave fields blank to keep <code class="text-white">---</code> awaiting state.
+                </p>
+                <div>
+                    <label id="modal-lbl-1" class="block text-[11px] font-mono text-gray-300 mb-1">Metric 1</label>
+                    <input type="text" id="modal-val-1" placeholder="e.g. $142,500" class="w-full bg-black/60 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs font-mono text-white focus:outline-none focus:border-neon-green">
+                </div>
+                <div>
+                    <label id="modal-lbl-2" class="block text-[11px] font-mono text-gray-300 mb-1">Metric 2</label>
+                    <input type="text" id="modal-val-2" placeholder="e.g. 34.8%" class="w-full bg-black/60 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs font-mono text-white focus:outline-none focus:border-neon-green">
+                </div>
+                <div id="modal-field-3-wrap">
+                    <label id="modal-lbl-3" class="block text-[11px] font-mono text-gray-300 mb-1">Metric 3</label>
+                    <input type="text" id="modal-val-3" placeholder="e.g. $4,850" class="w-full bg-black/60 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs font-mono text-white focus:outline-none focus:border-neon-green">
+                </div>
+                <div class="pt-2 flex flex-wrap items-center justify-between gap-2">
+                    <button onclick="resetSelectedSectorData()" class="px-3.5 py-2 rounded-xl text-xs font-mono text-amber-400 bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20">
+                        RESET TO "---" EMPTY
+                    </button>
+                    <button onclick="saveManualConnectorData()" class="px-5 py-2.5 rounded-xl font-orbitron text-xs font-bold bg-neon-green text-black hover:opacity-90 shadow-[0_0_15px_rgba(57,255,20,0.35)]">
+                        SAVE LIVE METRICS
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB B: Standalone Browser fetch() REST JSON Connector -->
+            <div id="connector-tab-api" class="hidden space-y-3.5">
+                <p class="text-xs text-gray-400">
+                    Connect any CORS-enabled REST JSON endpoint directly from your browser using native <code class="text-neon-blue">fetch()</code>. Supports dot-notation keys (e.g., <code class="text-gray-300">data.revenue</code>).
+                </p>
+                <div>
+                    <label class="block text-[11px] font-mono text-gray-300 mb-1">REST Endpoint URL (GET)</label>
+                    <input type="url" id="modal-api-url" placeholder="https://api.example.com/v1/metrics" class="w-full bg-black/60 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs font-mono text-neon-blue focus:outline-none focus:border-neon-blue">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    <div>
+                        <label id="modal-key-lbl-1" class="block text-[10px] font-mono text-gray-400 mb-1">JSON Key 1</label>
+                        <input type="text" id="modal-key-1" placeholder="e.g. revenue" class="w-full bg-black/60 border border-white/15 rounded-lg px-2.5 py-2 text-xs font-mono text-white">
+                    </div>
+                    <div>
+                        <label id="modal-key-lbl-2" class="block text-[10px] font-mono text-gray-400 mb-1">JSON Key 2</label>
+                        <input type="text" id="modal-key-2" placeholder="e.g. win_rate" class="w-full bg-black/60 border border-white/15 rounded-lg px-2.5 py-2 text-xs font-mono text-white">
+                    </div>
+                    <div id="modal-key-3-wrap">
+                        <label id="modal-key-lbl-3" class="block text-[10px] font-mono text-gray-400 mb-1">JSON Key 3</label>
+                        <input type="text" id="modal-key-3" placeholder="e.g. avg_deal" class="w-full bg-black/60 border border-white/15 rounded-lg px-2.5 py-2 text-xs font-mono text-white">
+                    </div>
+                </div>
+                <div id="api-fetch-feedback" class="hidden p-2.5 rounded-lg text-xs font-mono"></div>
+                <div class="pt-2 flex flex-wrap items-center justify-between gap-2">
+                    <button onclick="resetSelectedSectorData()" class="px-3.5 py-2 rounded-xl text-xs font-mono text-amber-400 bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20">
+                        UNBIND STREAM
+                    </button>
+                    <button onclick="executeApiStreamFetch()" class="px-5 py-2.5 rounded-xl font-orbitron text-xs font-bold bg-neon-blue text-black hover:opacity-90 shadow-[0_0_15px_rgba(0,243,255,0.35)]">
+                        FETCH & BIND STREAM
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // =========================================================
+        // 1. STANDALONE FINANCIAL SECTOR DEFINITIONS (NO BASE44)
+        // =========================================================
+        const STORAGE_KEY = 'ai_money_command_center_v1';
+
+        const SECTOR_DEFINITIONS = [
+            {
+                id: 'sales',
+                num: '01',
+                name: 'Sales',
+                short: 'SALES',
+                tagline: 'Revenue Pipeline & Conversion Velocity',
+                color: '#39FF14',
+                rgb: '57, 255, 20',
+                metrics: ['Gross Revenue', 'Win Rate', 'Avg Deal Size'],
+                phases: ['Lead Capture', 'AI Qualification', 'Revenue Close'],
+                agents: [
+                    { name: 'Closer_Prime', role: 'Outbound Revenue & Follow-Up', status: 'OPERATIONAL', active: true },
+                    { name: 'Pipe_Scout', role: 'Intent Scoring & Lead Routing', status: 'STANDBY', active: false }
+                ],
+                defaultTasks: [
+                    { id: 's1', text: 'Connect Stripe / CRM revenue webhook', done: false },
+                    { id: 's2', text: 'Audit high-intent inbound lead sequence', done: false },
+                    { id: 's3', text: 'Calibrate dynamic pricing tier rules', done: false }
+                ]
+            },
+            {
+                id: 'deals',
+                num: '02',
+                name: 'Deals',
+                short: 'DEALS',
+                tagline: 'High-Ticket Closings & Escrow Settlement',
+                color: '#00F3FF',
+                rgb: '0, 243, 255',
+                metrics: ['Active Escrow', 'Closing Velocity', 'Contract Yield'],
+                phases: ['Term Structuring', 'Compliance Review', 'Escrow Release'],
+                agents: [
+                    { name: 'Escrow_Sentinel', role: 'Contract & Milestone Verification', status: 'OPERATIONAL', active: true },
+                    { name: 'Term_Architect', role: 'High-Ticket Proposal Synthesis', status: 'OPERATIONAL', active: true }
+                ],
+                defaultTasks: [
+                    { id: 'd1', text: 'Verify automated wire/escrow settlement triggers', done: false },
+                    { id: 'd2', text: 'Review Q4 enterprise MSA templates', done: false },
+                    { id: 'd3', text: 'Sync signature status notifications', done: false }
+                ]
+            },
+            {
+                id: 'marketing',
+                num: '03',
+                name: 'Marketing',
+                short: 'MKTG',
+                tagline: 'ROAS, CAC & Paid Acquisition Flow',
+                color: '#BC13FE',
+                rgb: '188, 19, 254',
+                metrics: ['Blended ROAS', 'Blended CAC', 'Qualified Lead Flow'],
+                phases: ['Audience Targeting', 'Creative Split-Test', 'Attribution Sync'],
+                agents: [
+                    { name: 'Alpha_ROAS', role: 'Real-Time Ad Spend Reallocator', status: 'OPERATIONAL', active: true },
+                    { name: 'Funnel_Forge', role: 'Conversion Rate & Hook Optimizer', status: 'STANDBY', active: false }
+                ],
+                defaultTasks: [
+                    { id: 'm1', text: 'Bind ad-platform spend & attribution JSON', done: false },
+                    { id: 'm2', text: 'Pause underperforming acquisition cohorts', done: false },
+                    { id: 'm3', text: 'Deploy V2 high-converting VSL hook', done: false }
+                ]
+            },
+            {
+                id: 'customer-service',
+                num: '04',
+                name: 'Customer Service',
+                short: 'SERVICE',
+                tagline: 'Retention, LTV & Autonomous Ticket SLA',
+                color: '#FF5F1F',
+                rgb: '255, 95, 31',
+                metrics: ['Net Retention (NDR)', 'Avg Customer LTV', 'Ticket SLA Speed'],
+                phases: ['Instant Triage', 'Sentiment Guard', 'Upsell & Retain'],
+                agents: [
+                    { name: 'LTV_Guardian', role: 'Churn Prevention & Retention Bot', status: 'OPERATIONAL', active: true },
+                    { name: 'SLA_Responder', role: 'Sub-60s Tier-1 Resolution', status: 'OPERATIONAL', active: true }
+                ],
+                defaultTasks: [
+                    { id: 'c1', text: 'Configure churn-risk alert thresholds', done: false },
+                    { id: 'c2', text: 'Index updated refund & billing policy docs', done: false },
+                    { id: 'c3', text: 'Connect helpdesk SLA webhook stream', done: false }
+                ]
+            },
+            {
+                id: 'operations',
+                num: '05',
+                name: 'Operations',
+                short: 'OPS',
+                tagline: 'Fulfillment Throughput & Unit Margin',
+                color: '#39FF14',
+                rgb: '57, 255, 20',
+                metrics: ['Gross Unit Margin', 'Fulfillment Speed', 'Active Capacity'],
+                phases: ['Order Routing', 'Margin Audit', 'Delivery Lock'],
+                agents: [
+                    { name: 'Margin_Optimizer', role: 'COGS & Vendor Cost Tracker', status: 'OPERATIONAL', active: true },
+                    { name: 'Flow_Balancer', role: 'Bottleneck & Capacity Monitor', status: 'STANDBY', active: false }
+                ],
+                defaultTasks: [
+                    { id: 'o1', text: 'Audit per-unit fulfillment & API compute costs', done: false },
+                    { id: 'o2', text: 'Set automated vendor SLA latency alerts', done: false },
+                    { id: 'o3', text: 'Verify inventory/capacity buffer ratios', done: false }
+                ]
+            },
+            {
+                id: 'back-office',
+                num: '06',
+                name: 'Back Office',
+                short: 'BACK_OFC',
+                tagline: 'Cash Flow, Payroll & Monthly Burn Rate',
+                color: '#00F3FF',
+                rgb: '0, 243, 255',
+                metrics: ['Monthly Burn Rate', 'Net Cash Flow', 'Treasury Runway'],
+                phases: ['Ledger Sync', 'Payroll & Tax Lock', 'Runway Forecast'],
+                agents: [
+                    { name: 'Ledger_Core', role: 'Automated P&L Reconciliation', status: 'OPERATIONAL', active: true },
+                    { name: 'Burn_Watch', role: 'Expense Anomaly & Tax Reserve', status: 'OPERATIONAL', active: true }
+                ],
+                defaultTasks: [
+                    { id: 'b1', text: 'Connect read-only bank/treasury balance feed', done: false },
+                    { id: 'b2', text: 'Reconcile recurring SaaS & cloud overhead', done: false },
+                    { id: 'b3', text: 'Verify automated tax reserve sweep %', done: false }
+                ]
+            },
+            {
+                id: 'intelligence',
+                num: '07',
+                name: 'Intelligence',
+                short: 'INTEL',
+                tagline: 'AI Treasury & Macro Market Signals',
+                color: '#BC13FE',
+                rgb: '188, 19, 254',
+                metrics: ['Yield Signal Score', 'Market Volatility', 'Alpha Confidence'],
+                phases: ['Signal Scrape', 'Risk Simulation', 'Treasury Allocation'],
+                agents: [
+                    { name: 'Treasury_Oracle', role: 'Macro Liquidity & Yield Modeling', status: 'OPERATIONAL', active: true },
+                    { name: 'Signal_Hunter', role: 'Competitor & Sector Radar', status: 'OPERATIONAL', active: true }
+                ],
+                defaultTasks: [
+                    { id: 'i1', text: 'Bind market/treasury yield feed URL', done: false },
+                    { id: 'i2', text: 'Run cross-sector cash allocation simulation', done: false },
+                    { id: 'i3', text: 'Review weekly executive risk brief', done: false }
+                ]
+            }
+        ];
+
+        // =========================================================
+        // 2. PERSISTENT STATE (LOCALSTORAGE - ZERO CLOUD DEPENDENCY)
+        // =========================================================
+        let appState = loadState();
+        let activeSectorId = null; // null = Central Hub
+
+        function getDefaultState() {
+            const sectors = {};
+            SECTOR_DEFINITIONS.forEach(sec => {
+                sectors[sec.id] = {
+                    values: ['---', '---', '---'],
+                    bound: false,
+                    sourceType: 'EMPTY', // 'EMPTY' | 'MANUAL' | 'API'
+                    apiUrl: '',
+                    apiKeys: ['', '', ''],
+                    phase: 1,
+                    tasks: JSON.parse(JSON.stringify(sec.defaultTasks))
+                };
+            });
+
+            return {
+                globalTreasury: {
+                    cash: '---',
+                    pipeline: '---',
+                    bound: false,
+                    sourceType: 'EMPTY',
+                    apiUrl: '',
+                    apiKeys: ['', '']
+                },
+                sectors,
+                logs: [
+                    { time: formatNow(), tag: 'SYSTEM', color: '#39FF14', text: 'AI MONEY COMMAND CENTER booted in standalone mode (Zero external SDKs).' },
+                    { time: formatNow(), tag: 'HONEST_UI', color: '#00F3FF', text: 'All telemetry slots initialized to "---" awaiting real API or manual input.' }
+                ]
+            };
+        }
+
+        function loadState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return getDefaultState();
+                const parsed = JSON.parse(raw);
+                // Merge defaults safely in case of schema updates
+                const base = getDefaultState();
+                return {
+                    globalTreasury: { ...base.globalTreasury, ...(parsed.globalTreasury || {}) },
+                    sectors: Object.keys(base.sectors).reduce((acc, id) => {
+                        acc[id] = { ...base.sectors[id], ...(parsed.sectors?.[id] || {}) };
+                        return acc;
+                    }, {}),
+                    logs: Array.isArray(parsed.logs) && parsed.logs.length ? parsed.logs : base.logs
+                };
+            } catch (e) {
+                return getDefaultState();
+            }
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+            } catch (e) {
+                console.warn('localStorage write unavailable:', e);
+            }
+        }
+
+        function formatNow() {
+            return new Date().toTimeString().split(' ')[0];
+        }
+
+        function addLog(tag, text, color = '#00F3FF') {
+            appState.logs.unshift({ time: formatNow(), tag, color, text });
+            if (appState.logs.length > 35) appState.logs.pop();
+            saveState();
+            renderActivityLogs();
+        }
+
+        // =========================================================
+        // 3. INITIALIZATION & LIVE CLOCK
+        // =========================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            renderNavigation();
+            renderHubView();
+            renderActivityLogs();
+            updateGlobalStreamIndicators();
+            populateModalSectorSelect();
+            startClock();
+        });
+
+        function startClock() {
+            const tick = () => {
+                const t = formatNow();
+                const topClock = document.getElementById('live-system-clock');
+                const hubClock = document.getElementById('hub-clock-mini');
+                if (topClock) topClock.innerText = t;
+                if (hubClock) hubClock.innerText = t;
+            };
+            tick();
+            setInterval(tick, 1000);
+        }
+
+        // =========================================================
+        // 4. NAVIGATION (DESKTOP SIDEBAR + FULL 7-SECTOR MOBILE NAV)
+        // =========================================================
+        function renderNavigation() {
+            const desktopList = document.getElementById('desktop-dept-list');
+            const mobileList = document.getElementById('mobile-dept-list');
+            desktopList.innerHTML = '';
+            mobileList.innerHTML = '';
+
+            SECTOR_DEFINITIONS.forEach(sec => {
+                const isBound = appState.sectors[sec.id]?.bound;
+
+                // Desktop Sidebar Button
+                const dBtn = document.createElement('button');
+                dBtn.id = `d-nav-${sec.id}`;
+                dBtn.onclick = () => showDepartment(sec.id);
+                dBtn.className = 'w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium text-gray-300 hover:text-white hover:bg-white/5 transition-all border border-transparent group';
+                dBtn.innerHTML = `
+                    <span class="flex items-center gap-2.5 truncate">
+                        <span class="font-mono text-[10px] text-gray-500 group-hover:text-white">${sec.num}.</span>
+                        <span class="truncate">${sec.name}</span>
+                    </span>
+                    <span class="w-2 h-2 rounded-full shrink-0 ${isBound ? 'animate-pulse' : 'opacity-40'}" style="background-color: ${sec.color}"></span>
+                `;
+                desktopList.appendChild(dBtn);
+
+                // Mobile Bottom Nav Pill (All 7 Departments Accessible)
+                const mBtn = document.createElement('button');
+                mBtn.id = `m-nav-${sec.id}`;
+                mBtn.onclick = () => showDepartment(sec.id);
+                mBtn.className = 'shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl text-[10px] font-orbitron tracking-wider text-gray-300 bg-white/[0.04] border border-white/10 transition-all';
+                mBtn.innerHTML = `
+                    <span class="w-1.5 h-1.5 rounded-full" style="background-color: ${sec.color}"></span>
+                    <span>${sec.short}</span>
+                `;
+                mobileList.appendChild(mBtn);
+            });
+        }
+
+        function updateNavHighlights() {
+            const dHub = document.getElementById('desktop-hub-btn');
+            const mHub = document.getElementById('mobile-hub-btn');
+
+            if (!activeSectorId) {
+                dHub.className = 'w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-orbitron tracking-wider transition-all mb-6 bg-neon-green/15 text-neon-green border border-neon-green/40 shadow-[0_0_15px_rgba(57,255,20,0.15)]';
+                mHub.className = 'shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl font-orbitron text-[10px] font-bold tracking-wider bg-neon-green/20 text-neon-green border border-neon-green/50';
+            } else {
+                dHub.className = 'w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-orbitron tracking-wider transition-all mb-6 text-gray-400 hover:text-white hover:bg-white/5 border border-transparent';
+                mHub.className = 'shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl font-orbitron text-[10px] font-bold tracking-wider text-gray-400 bg-white/[0.04] border border-white/10';
+            }
+
+            SECTOR_DEFINITIONS.forEach(sec => {
+                const dBtn = document.getElementById(`d-nav-${sec.id}`);
+                const mBtn = document.getElementById(`m-nav-${sec.id}`);
+                if (!dBtn || !mBtn) return;
+
+                if (sec.id === activeSectorId) {
+                    dBtn.style.backgroundColor = `rgba(${sec.rgb}, 0.14)`;
+                    dBtn.style.borderColor = `rgba(${sec.rgb}, 0.45)`;
+                    dBtn.classList.add('text-white', 'font-semibold');
+
+                    mBtn.style.backgroundColor = `rgba(${sec.rgb}, 0.2)`;
+                    mBtn.style.borderColor = sec.color;
+                    mBtn.style.color = '#FFFFFF';
+                } else {
+                    dBtn.style.backgroundColor = 'transparent';
+                    dBtn.style.borderColor = 'transparent';
+                    dBtn.classList.remove('text-white', 'font-semibold');
+
+                    mBtn.style.backgroundColor = 'rgba(255, 255, 255, 0.04)';
+                    mBtn.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                    mBtn.style.color = '#D1D5DB';
+                }
+            });
+        }
+
+        // =========================================================
+        // 5. VIEW SWITCHING (HUB VS DEPARTMENT)
+        // =========================================================
+        function showHub() {
+            activeSectorId = null;
+            document.getElementById('dept-dashboard').classList.remove('active');
+            document.getElementById('main-hub').classList.add('active');
+            document.getElementById('top-breadcrumb').innerText = 'TREASURY_CORE_HUB';
+
+            document.documentElement.style.setProperty('--active-accent', '#39FF14');
+            document.documentElement.style.setProperty('--active-rgb', '57, 255, 20');
+
+            updateNavHighlights();
+            renderHubView();
+        }
+
+        function showDepartment(sectorId) {
+            const sec = SECTOR_DEFINITIONS.find(s => s.id === sectorId);
+            if (!sec) return;
+            activeSectorId = sectorId;
+
+            // Apply dynamic department neon theme
+            document.documentElement.style.setProperty('--active-accent', sec.color);
+            document.documentElement.style.setProperty('--active-rgb', sec.rgb);
+
+            document.getElementById('main-hub').classList.remove('active');
+            document.getElementById('dept-dashboard').classList.add('active');
+            document.getElementById('top-breadcrumb').innerText = `SECTOR_${sec.num} // ${sec.name.toUpperCase().replace(' ', '_')}`;
+
+            updateNavHighlights();
+            renderDepartmentDashboard(sec);
+            addLog(sec.short, `Focused telemetry on ${sec.name} (${sec.tagline}).`, sec.color);
+        }
+
+        // =========================================================
+        // 6. RENDER CENTRAL HUB & 7-DEPARTMENT RAPID GRID
+        // =========================================================
+        function renderHubView() {
+            // Update Global Treasury Strip
+            const gt = appState.globalTreasury;
+            document.getElementById('global-treasury-cash').innerText = gt.cash || '---';
+            document.getElementById('global-treasury-pipe').innerText = gt.pipeline || '---';
+            
+            const cashSub = document.getElementById('global-treasury-cash-sub');
+            const pipeSub = document.getElementById('global-treasury-pipe-sub');
+            if (gt.bound) {
+                cashSub.innerText = `Live (${gt.sourceType})`;
+                cashSub.className = 'text-[10px] font-mono text-neon-green mt-1';
+                pipeSub.innerText = `Live (${gt.sourceType})`;
+                pipeSub.className = 'text-[10px] font-mono text-neon-green mt-1';
+            } else {
+                cashSub.innerText = 'Awaiting Stream';
+                cashSub.className = 'text-[10px] font-mono text-amber-400 mt-1';
+                pipeSub.innerText = 'Awaiting Stream';
+                pipeSub.className = 'text-[10px] font-mono text-amber-400 mt-1';
+            }
+
+            // Count bound sectors
+            const boundSectors = Object.values(appState.sectors).filter(s => s.bound).length;
+            document.getElementById('global-bound-count').innerText = `${boundSectors} / 7`;
+
+            // Render 7-Department Rapid Grid
+            const grid = document.getElementById('hub-sector-grid');
+            grid.innerHTML = '';
+
+            SECTOR_DEFINITIONS.forEach(sec => {
+                const secState = appState.sectors[sec.id];
+                const primaryMetricVal = secState.values[0] || '---';
+                const card = document.createElement('div');
+                card.onclick = () => showDepartment(sec.id);
+                card.className = 'glass-card p-5 rounded-2xl cursor-pointer flex flex-col justify-between group';
+                card.style.borderTop = `2px solid ${sec.color}`;
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="font-mono text-[10px] px-2 py-0.5 rounded" style="background: rgba(${sec.rgb}, 0.12); color: ${sec.color}">SECTOR ${sec.num}</span>
+                            <span class="text-[10px] font-mono ${secState.bound ? 'text-neon-green' : 'text-gray-500'}">
+                                ${secState.bound ? '● BOUND' : '○ STANDBY'}
+                            </span>
+                        </div>
+                        <h3 class="font-orbitron text-base font-bold text-white group-hover:tracking-wider transition-all" style="text-shadow: 0 0 12px rgba(${sec.rgb}, 0.35)">
+                            ${sec.name.toUpperCase()}
+                        </h3>
+                        <p class="text-[11px] text-gray-400 mt-1 line-clamp-1">${sec.tagline}</p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-white/10 flex items-end justify-between">
+                        <div>
+                            <div class="text-[9px] font-mono text-gray-500 uppercase">${sec.metrics[0]}</div>
+                            <div class="font-orbitron text-sm font-bold text-white mt-0.5">${escapeHtml(primaryMetricVal)}</div>
+                        </div>
+                        <span class="font-orbitron text-[10px] font-bold group-hover:translate-x-1 transition-transform" style="color: ${sec.color}">
+                            OPEN →
+                        </span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function updateGlobalStreamIndicators() {
+            const anyBound = appState.globalTreasury.bound || Object.values(appState.sectors).some(s => s.bound);
+            const sDot = document.getElementById('sidebar-status-dot');
+            const sText = document.getElementById('sidebar-status-text');
+            const hDot = document.getElementById('header-stream-dot');
+            const hBadge = document.getElementById('header-stream-badge');
+
+            if (anyBound) {
+                sDot.className = 'w-2.5 h-2.5 rounded-full bg-neon-green animate-ping shrink-0';
+                sText.innerText = 'Live Stream Bound';
+                hDot.className = 'w-2 h-2 rounded-full bg-neon-green animate-ping';
+                hBadge.innerText = 'STREAM: ACTIVE';
+            } else {
+                sDot.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse shrink-0';
+                sText.innerText = '--- Awaiting Input';
+                hDot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-ping';
+                hBadge.innerText = 'STREAM: STANDBY';
+            }
+        }
+
+        // =========================================================
+        // 7. RENDER DYNAMIC DEPARTMENT DASHBOARD
+        // =========================================================
+        function renderDepartmentDashboard(sec) {
+            const state = appState.sectors[sec.id];
+
+            document.getElementById('dept-number-badge').innerText = `SECTOR ${sec.num}`;
+            document.getElementById('dept-title').innerText = sec.name.toUpperCase();
+            document.getElementById('dept-tagline').innerText = sec.tagline;
+
+            // Show Fetch Refresh button if REST API URL is configured
+            const refreshBtn = document.getElementById('dept-refresh-btn');
+            if (state.sourceType === 'API' && state.apiUrl) {
+                refreshBtn.classList.remove('hidden');
+            } else {
+                refreshBtn.classList.add('hidden');
+            }
+
+            // Render 3 Tailored Metric Cards
+            for (let i = 0; i < 3; i++) {
+                const idx = i + 1;
+                const val = state.values[i] || '---';
+                const isPopulated = state.bound && val !== '---';
+
+                document.getElementById(`m${idx}-label`).innerText = sec.metrics[i];
+                document.getElementById(`m${idx}-value`).innerText = val;
+                document.getElementById(`m${idx}-status`).innerText = isPopulated
+                    ? `Live (${state.sourceType})`
+                    : 'Awaiting Input';
+                document.getElementById(`m${idx}-source-tag`).innerText = isPopulated
+                    ? state.sourceType
+                    : 'EMPTY';
+            }
+
+            // Render Tailored AI Agent Squad
+            const agentBox = document.getElementById('dept-agents-container');
+            agentBox.innerHTML = '';
+            sec.agents.forEach(ag => {
+                const row = document.createElement('div');
+                row.className = `p-3 rounded-xl border flex items-center justify-between ${ag.active ? 'bg-white/[0.04] border-white/15' : 'bg-black/30 border-white/5 opacity-60'}`;
+                row.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-full flex items-center justify-center font-orbitron text-xs font-bold" style="background: linear-gradient(135deg, rgba(${sec.rgb}, 0.35), rgba(255,255,255,0.05)); border: 1px solid rgba(${sec.rgb}, 0.5); color: ${sec.color}">
+                            AI
+                        </div>
+                        <div>
+                            <div class="text-xs font-bold text-white">${ag.name}</div>
+                            <div class="text-[11px] text-gray-400">${ag.role}</div>
+                        </div>
+                    </div>
+                    <span class="text-[10px] font-mono px-2 py-0.5 rounded-full ${ag.active ? 'bg-neon-green/15 text-neon-green border border-neon-green/30' : 'bg-gray-800 text-gray-400'}">
+                        ${ag.status}
+                    </span>
+                `;
+                agentBox.appendChild(row);
+            });
+
+            // Render Persistent Tasks
+            renderDepartmentTasks(sec);
+
+            // Render 3-Phase Workflow Pipeline
+            renderWorkflowPipeline(sec, state.phase);
+        }
+
+        // Tasks (Add / Toggle / Delete with localStorage persistence)
+        function renderDepartmentTasks(sec) {
+            const state = appState.sectors[sec.id];
+            const list = document.getElementById('dept-tasks-container');
+            list.innerHTML = '';
+
+            let doneCount = 0;
+            state.tasks.forEach((task, idx) => {
+                if (task.done) doneCount++;
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between gap-2 p-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 transition-colors group';
+                item.innerHTML = `
+                    <label class="flex items-center gap-3 flex-1 cursor-pointer min-w-0">
+                        <input type="checkbox" class="cyber-check" ${task.done ? 'checked' : ''} onchange="toggleDepartmentTask(${idx})">
+                        <span class="text-xs truncate ${task.done ? 'line-through text-gray-500' : 'text-gray-200'}">${escapeHtml(task.text)}</span>
+                    </label>
+                    <button onclick="deleteDepartmentTask(${idx})" class="text-gray-600 hover:text-red-400 text-xs px-1.5 opacity-70 group-hover:opacity-100 transition-opacity" title="Delete directive">
+                        ✕
+                    </button>
+                `;
+                list.appendChild(item);
+            });
+
+            document.getElementById('dept-task-stats').innerText = `${doneCount}/${state.tasks.length} DONE`;
+        }
+
+        function handleAddTask(e) {
+            e.preventDefault();
+            if (!activeSectorId) return;
+            const input = document.getElementById('new-directive-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const sec = SECTOR_DEFINITIONS.find(s => s.id === activeSectorId);
+            appState.sectors[activeSectorId].tasks.unshift({
+                id: 't_' + Date.now(),
+                text,
+                done: false
+            });
+            input.value = '';
+            saveState();
+            renderDepartmentTasks(sec);
+            addLog(sec.short, `Added directive: "${text}"`, sec.color);
+        }
+
+        function toggleDepartmentTask(idx) {
+            if (!activeSectorId) return;
+            const sec = SECTOR_DEFINITIONS.find(s => s.id === activeSectorId);
+            const task = appState.sectors[activeSectorId].tasks[idx];
+            if (!task) return;
+            task.done = !task.done;
+            saveState();
+            renderDepartmentTasks(sec);
+            addLog(sec.short, `Directive ${task.done ? 'completed' : 'reopened'}: "${task.text}"`, sec.color);
+        }
+
+        function deleteDepartmentTask(idx) {
+            if (!activeSectorId) return;
+            const sec = SECTOR_DEFINITIONS.find(s => s.id === activeSectorId);
+            const removed = appState.sectors[activeSectorId].tasks.splice(idx, 1)[0];
+            saveState();
+            renderDepartmentTasks(sec);
+            if (removed) {
+                addLog(sec.short, `Removed directive: "${removed.text}"`, '#FF5F1F');
+            }
+        }
+
+        // 3-Phase Workflow Pipeline
+        function setDepartmentPhase(phaseNum) {
+            if (!activeSectorId) return;
+            const sec = SECTOR_DEFINITIONS.find(s => s.id === activeSectorId);
+            appState.sectors[activeSectorId].phase = phaseNum;
+            saveState();
+            renderWorkflowPipeline(sec, phaseNum);
+            addLog(sec.short, `Pipeline shifted to PHASE_0${phaseNum} (${sec.phases[phaseNum - 1]}).`, sec.color);
+        }
+
+        function renderWorkflowPipeline(sec, activePhase) {
+            document.getElementById('pipeline-phase-label').innerText = `PHASE_0${activePhase} // ${sec.phases[activePhase - 1].toUpperCase()}`;
+            document.getElementById('pipeline-description').innerText = `Executing stage ${activePhase} of 3: ${sec.phases[activePhase - 1]} protocol active.`;
+
+            for (let i = 1; i <= 3; i++) {
+                const bar = document.getElementById(`phase-bar-${i}`);
+                const sub = document.getElementById(`phase-sub-${i}`);
+                sub.innerText = sec.phases[i - 1];
+
+                if (i <= activePhase) {
+                    bar.style.backgroundColor = sec.color;
+                    bar.style.boxShadow = `0 0 12px rgba(${sec.rgb}, 0.55)`;
+                } else {
+                    bar.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                    bar.style.boxShadow = 'none';
+                }
+            }
+        }
+
+        // System Activity Logs
+        function renderActivityLogs() {
+            const feed = document.getElementById('activity-log-feed');
+            if (!feed) return;
+            feed.innerHTML = '';
+            appState.logs.forEach(entry => {
+                const p = document.createElement('p');
+                p.innerHTML = `<span class="text-gray-500">[${entry.time}]</span> <span style="color: ${entry.color}" class="font-bold">[${escapeHtml(entry.tag)}]</span> <span class="text-gray-300">${escapeHtml(entry.text)}</span>`;
+                feed.appendChild(p);
+            });
+        }
+
+        function runDiagnosticPing() {
+            const label = activeSectorId
+                ? SECTOR_DEFINITIONS.find(s => s.id === activeSectorId).short
+                : 'CORE';
+            addLog(label, 'Standalone node heartbeat verified (<4ms local latency).', '#39FF14');
+        }
+
+        function clearActivityLogs() {
+            appState.logs = [{ time: formatNow(), tag: 'SYSTEM', color: '#00F3FF', text: 'Activity log buffer cleared by operator.' }];
+            saveState();
+            renderActivityLogs();
+        }
+
+        // =========================================================
+        // 8. STANDALONE DATA STREAM CONNECTOR MODAL (REST + MANUAL)
+        // =========================================================
+        function populateModalSectorSelect() {
+            const select = document.getElementById('modal-sector-select');
+            select.innerHTML = `<option value="global">00. GLOBAL TREASURY CORE (Hub Strip)</option>`;
+            SECTOR_DEFINITIONS.forEach(sec => {
+                const opt = document.createElement('option');
+                opt.value = sec.id;
+                opt.textContent = `${sec.num}. ${sec.name.toUpperCase()} (${sec.metrics.join(' / ')})`;
+                select.appendChild(opt);
+            });
+        }
+
+        function openConnectorModal() {
+            const select = document.getElementById('modal-sector-select');
+            select.value = activeSectorId || 'global';
+            loadSectorIntoModal();
+            hideFetchFeedback();
+
+            const modal = document.getElementById('connector-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeConnectorModal() {
+            const modal = document.getElementById('connector-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function switchConnectorTab(tab) {
+            const manualDiv = document.getElementById('connector-tab-manual');
+            const apiDiv = document.getElementById('connector-tab-api');
+            const btnManual = document.getElementById('tab-btn-manual');
+            const btnApi = document.getElementById('tab-btn-api');
+
+            if (tab === 'manual') {
+                manualDiv.classList.remove('hidden');
+                apiDiv.classList.add('hidden');
+                btnManual.className = 'py-2 rounded-lg font-orbitron text-xs font-bold bg-neon-green text-black transition-all';
+                btnApi.className = 'py-2 rounded-lg font-orbitron text-xs font-bold text-gray-400 hover:text-white transition-all';
+            } else {
+                manualDiv.classList.add('hidden');
+                apiDiv.classList.remove('hidden');
+                btnApi.className = 'py-2 rounded-lg font-orbitron text-xs font-bold bg-neon-blue text-black transition-all';
+                btnManual.className = 'py-2 rounded-lg font-orbitron text-xs font-bold text-gray-400 hover:text-white transition-all';
+            }
+        }
+
+        function loadSectorIntoModal() {
+            const target = document.getElementById('modal-sector-select').value;
+            const field3Wrap = document.getElementById('modal-field-3-wrap');
+            const key3Wrap = document.getElementById('modal-key-3-wrap');
+            hideFetchFeedback();
+
+            if (target === 'global') {
+                const gt = appState.globalTreasury;
+                document.getElementById('modal-lbl-1').innerText = 'Net Liquidity / Cash';
+                document.getElementById('modal-lbl-2').innerText = 'Active Pipeline Value';
+                field3Wrap.classList.add('hidden');
+                key3Wrap.classList.add('hidden');
+
+                document.getElementById('modal-val-1').value = gt.cash === '---' ? '' : gt.cash;
+                document.getElementById('modal-val-2').value = gt.pipeline === '---' ? '' : gt.pipeline;
+
+                document.getElementById('modal-api-url').value = gt.apiUrl || '';
+                document.getElementById('modal-key-1').value = gt.apiKeys?.[0] || '';
+                document.getElementById('modal-key-2').value = gt.apiKeys?.[1] || '';
+            } else {
+                const sec = SECTOR_DEFINITIONS.find(s => s.id === target);
+                const state = appState.sectors[target];
+                field3Wrap.classList.remove('hidden');
+                key3Wrap.classList.remove('hidden');
+
+                document.getElementById('modal-lbl-1').innerText = sec.metrics[0];
+                document.getElementById('modal-lbl-2').innerText = sec.metrics[1];
+                document.getElementById('modal-lbl-3').innerText = sec.metrics[2];
+
+                document.getElementById('modal-key-lbl-1').innerText = `Key: ${sec.metrics[0]}`;
+                document.getElementById('modal-key-lbl-2').innerText = `Key: ${sec.metrics[1]}`;
+                document.getElementById('modal-key-lbl-3').innerText = `Key: ${sec.metrics[2]}`;
+
+                document.getElementById('modal-val-1').value = state.values[0] === '---' ? '' : state.values[0];
+                document.getElementById('modal-val-2').value = state.values[1] === '---' ? '' : state.values[1];
+                document.getElementById('modal-val-3').value = state.values[2] === '---' ? '' : state.values[2];
+
+                document.getElementById('modal-api-url').value = state.apiUrl || '';
+                document.getElementById('modal-key-1').value = state.apiKeys?.[0] || '';
+                document.getElementById('modal-key-2').value = state.apiKeys?.[1] || '';
+                document.getElementById('modal-key-3').value = state.apiKeys?.[2] || '';
+            }
+        }
+
+        function saveManualConnectorData() {
+            const target = document.getElementById('modal-sector-select').value;
+            const v1 = document.getElementById('modal-val-1').value.trim() || '---';
+            const v2 = document.getElementById('modal-val-2').value.trim() || '---';
+            const v3 = document.getElementById('modal-val-3').value.trim() || '---';
+
+            if (target === 'global') {
+                const hasData = v1 !== '---' || v2 !== '---';
+                appState.globalTreasury.cash = v1;
+                appState.globalTreasury.pipeline = v2;
+                appState.globalTreasury.bound = hasData;
+                appState.globalTreasury.sourceType = hasData ? 'MANUAL' : 'EMPTY';
+                addLog('TREASURY', `Updated global treasury figures (${v1} / ${v2}).`, '#39FF14');
+            } else {
+                const sec = SECTOR_DEFINITIONS.find(s => s.id === target);
+                const hasData = v1 !== '---' || v2 !== '---' || v3 !== '---';
+                appState.sectors[target].values = [v1, v2, v3];
+                appState.sectors[target].bound = hasData;
+                appState.sectors[target].sourceType = hasData ? 'MANUAL' : 'EMPTY';
+                addLog(sec.short, `Injected live manual figures into ${sec.name}.`, sec.color);
+            }
+
+            saveState();
+            syncAllViewsAfterUpdate();
+            closeConnectorModal();
+        }
+
+        async function executeApiStreamFetch() {
+            const target = document.getElementById('modal-sector-select').value;
+            const url = document.getElementById('modal-api-url').value.trim();
+            const k1 = document.getElementById('modal-key-1').value.trim();
+            const k2 = document.getElementById('modal-key-2').value.trim();
+            const k3 = document.getElementById('modal-key-3').value.trim();
+
+            if (!url) {
+                showFetchFeedback('Please enter a valid HTTPS REST JSON endpoint URL.', true);
+                return;
+            }
+
+            showFetchFeedback('Connecting via native browser fetch()...', false);
+
+            try {
+                const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+
+                const extract = (key) => {
+                    if (!key) return '---';
+                    const val = resolveDotPath(data, key);
+                    return (val !== undefined && val !== null && val !== '') ? String(val) : '---';
+                };
+
+                if (target === 'global') {
+                    const v1 = extract(k1);
+                    const v2 = extract(k2);
+                    appState.globalTreasury = {
+                        cash: v1,
+                        pipeline: v2,
+                        bound: v1 !== '---' || v2 !== '---',
+                        sourceType: 'API',
+                        apiUrl: url,
+                        apiKeys: [k1, k2]
+                    };
+                    addLog('TREASURY', `Bound live REST API stream to Global Treasury.`, '#00F3FF');
+                } else {
+                    const sec = SECTOR_DEFINITIONS.find(s => s.id === target);
+                    const v1 = extract(k1);
+                    const v2 = extract(k2);
+                    const v3 = extract(k3);
+                    appState.sectors[target].values = [v1, v2, v3];
+                    appState.sectors[target].bound = (v1 !== '---' || v2 !== '---' || v3 !== '---');
+                    appState.sectors[target].sourceType = 'API';
+                    appState.sectors[target].apiUrl = url;
+                    appState.sectors[target].apiKeys = [k1, k2, k3];
+                    addLog(sec.short, `Live REST JSON stream bound to ${sec.name}.`, sec.color);
+                }
+
+                saveState();
+                syncAllViewsAfterUpdate();
+                showFetchFeedback('Stream connected & persisted to localStorage!', false);
+                setTimeout(closeConnectorModal, 650);
+            } catch (err) {
+                showFetchFeedback(`Fetch failed (${err.message}). Verify URL & CORS headers, or use Manual Live Input.`, true);
+            }
+        }
+
+        async function refreshCurrentDeptStream() {
+            if (!activeSectorId) return;
+            const sec = SECTOR_DEFINITIONS.find(s => s.id === activeSectorId);
+            const state = appState.sectors[activeSectorId];
+            if (!state.apiUrl) return;
+
+            addLog(sec.short, `Polling REST endpoint: ${state.apiUrl}...`, '#00F3FF');
+            try {
+                const res = await fetch(state.apiUrl, { headers: { 'Accept': 'application/json' } });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                state.values = state.apiKeys.map(k => {
+                    if (!k) return '---';
+                    const v = resolveDotPath(data, k);
+                    return (v !== undefined && v !== null && v !== '') ? String(v) : '---';
+                });
+                state.bound = state.values.some(v => v !== '---');
+                saveState();
+                renderDepartmentDashboard(sec);
+                addLog(sec.short, `Telemetry refreshed from REST JSON stream.`, '#39FF14');
+            } catch (err) {
+                addLog(sec.short, `Stream poll failed: ${err.message}`, '#FF5F1F');
+            }
+        }
+
+        function resetSelectedSectorData() {
+            const target = document.getElementById('modal-sector-select').value;
+            if (target === 'global') {
+                appState.globalTreasury = {
+                    cash: '---',
+                    pipeline: '---',
+                    bound: false,
+                    sourceType: 'EMPTY',
+                    apiUrl: '',
+                    apiKeys: ['', '']
+                };
+                addLog('TREASURY', 'Reset Global Treasury to "---" awaiting state.', '#FF5F1F');
+            } else {
+                const sec = SECTOR_DEFINITIONS.find(s => s.id === target);
+                appState.sectors[target].values = ['---', '---', '---'];
+                appState.sectors[target].bound = false;
+                appState.sectors[target].sourceType = 'EMPTY';
+                appState.sectors[target].apiUrl = '';
+                appState.sectors[target].apiKeys = ['', '', ''];
+                addLog(sec.short, `Reset ${sec.name} metrics to "---" awaiting state.`, '#FF5F1F');
+            }
+
+            saveState();
+            loadSectorIntoModal();
+            syncAllViewsAfterUpdate();
+        }
+
+        function syncAllViewsAfterUpdate() {
+            renderNavigation();
+            updateNavHighlights();
+            updateGlobalStreamIndicators();
+            if (activeSectorId) {
+                const sec = SECTOR_DEFINITIONS.find(s => s.id === activeSectorId);
+                renderDepartmentDashboard(sec);
+            } else {
+                renderHubView();
+            }
+        }
+
+        // Helper: Resolve dot-notation JSON keys like "data.metrics.revenue"
+        function resolveDotPath(obj, path) {
+            return path.split('.').reduce((acc, part) => (acc && acc[part] !== undefined) ? acc[part] : undefined, obj);
+        }
+
+        function showFetchFeedback(msg, isError) {
+            const box = document.getElementById('api-fetch-feedback');
+            box.classList.remove('hidden', 'bg-red-500/15', 'text-red-300', 'border-red-500/30', 'bg-neon-green/15', 'text-neon-green', 'border-neon-green/30');
+            box.classList.add('border');
+            if (isError) {
+                box.classList.add('bg-red-500/15', 'text-red-300', 'border-red-500/30');
+            } else {
+                box.classList.add('bg-neon-green/15', 'text-neon-green', 'border-neon-green/30');
+            }
+            box.innerText = msg;
+        }
+
+        function hideFetchFeedback() {
+            const box = document.getElementById('api-fetch-feedback');
+            if (box) box.classList.add('hidden');
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

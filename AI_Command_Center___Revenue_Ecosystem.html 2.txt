@@ -1,0 +1,1591 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#090b10" />
+  <title>Neural Core • AI Command Center & Revenue Ecosystem</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            hud: {
+              bg: '#090b10',
+              panel: '#0e121b',
+              border: '#1c2436',
+              cyan: '#00f0ff',
+              emerald: '#10b981',
+              purple: '#a855f7',
+              amber: '#f59e0b',
+              rose: '#f43f5e'
+            }
+          },
+          boxShadow: {
+            'neon-cyan': '0 0 15px rgba(0, 240, 255, 0.25)',
+            'neon-emerald': '0 0 15px rgba(16, 185, 129, 0.25)',
+            'neon-amber': '0 0 15px rgba(245, 158, 11, 0.2)',
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body {
+      background-color: #090b10;
+      color: #e2e8f0;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Subtle cyber grid background */
+    .cyber-grid {
+      background-size: 28px 28px;
+      background-image: 
+        linear-gradient(to right, rgba(0, 240, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 240, 255, 0.04) 1px, transparent 1px);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #090b10;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+
+    /* Pulse Animations */
+    @keyframes pulseRing {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.05); opacity: 0.3; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .animate-pulse-ring {
+      animation: pulseRing 3s infinite ease-in-out;
+    }
+
+    @keyframes dashFlow {
+      to {
+        stroke-dashoffset: -24;
+      }
+    }
+    .conduit-flow {
+      stroke-dasharray: 6 6;
+      animation: dashFlow 1.2s linear infinite;
+    }
+
+    /* Retro Pixel-HUD Scanline overlay for Floorplan View */
+    .scanlines {
+      background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%, 
+        rgba(0, 0, 0, 0.35) 50%
+      );
+      background-size: 100% 4px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col pb-24 md:pb-8 selection:bg-cyan-500/30 selection:text-cyan-200">
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 md:px-0"></div>
+
+  <!-- Top Command Header -->
+  <header class="sticky top-0 z-40 bg-[#090b10]/90 backdrop-blur-md border-b border-slate-800/80">
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
+      <!-- Brand / Core Emblem -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-cyan-950/60 border border-cyan-500/40 flex items-center justify-center shadow-neon-cyan relative">
+          <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+          </svg>
+          <span class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+          <span class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-bold text-base sm:text-lg tracking-tight text-white">Command Center</h1>
+            <span id="mode-pill" class="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30">DEMO</span>
+          </div>
+          <p class="text-[11px] font-mono tracking-widest text-cyan-400/90 uppercase">NEURAL CORE • ONLINE</p>
+        </div>
+      </div>
+
+      <!-- Desktop Nav Links -->
+      <nav class="hidden md:flex items-center gap-1 bg-slate-900/80 p-1 rounded-xl border border-slate-800">
+        <button onclick="switchTab('home')" data-tab="home" class="nav-btn px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5">
+          <span>Home</span>
+        </button>
+        <button onclick="switchTab('depts')" data-tab="depts" class="nav-btn px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5">
+          <span>Depts</span>
+        </button>
+        <button onclick="switchTab('aicore')" data-tab="aicore" class="nav-btn px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5">
+          <span>AI Core</span>
+        </button>
+        <button onclick="switchTab('approve')" data-tab="approve" class="nav-btn px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 relative">
+          <span>Approve</span>
+          <span id="desktop-approve-badge" class="hidden px-1.5 py-0.2 text-[10px] font-mono rounded-full bg-purple-500 text-white">0</span>
+        </button>
+        <button onclick="switchTab('tasks')" data-tab="tasks" class="nav-btn px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5">
+          <span>Tasks & Ledger</span>
+        </button>
+      </nav>
+
+      <!-- Live Revenue Ticker & Notifications -->
+      <div class="flex items-center gap-2.5 sm:gap-3">
+        <div class="text-right bg-slate-900/90 border border-slate-800 px-3 py-1.5 rounded-xl">
+          <div class="text-[10px] font-mono uppercase text-slate-400 flex items-center justify-end gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span id="revenue-label">SIMULATED REV</span>
+          </div>
+          <div id="live-revenue-ticker" class="font-mono font-bold text-sm sm:text-base text-emerald-400 tracking-tight">$0.00</div>
+        </div>
+
+        <button onclick="switchTab('approve')" class="relative p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 transition" title="Pending Approvals">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+          </svg>
+          <span id="header-notif-badge" class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-amber-500 text-slate-950 font-mono font-bold text-[11px] flex items-center justify-center">4</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace Container -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 pt-4 space-y-5">
+
+    <!-- Demo vs Live Mode Banner -->
+    <section id="mode-banner" class="rounded-2xl border border-amber-500/35 bg-gradient-to-r from-amber-950/30 via-[#13110c] to-slate-900/60 p-4 shadow-neon-amber transition-all">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-start gap-3">
+          <div class="p-2 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 shrink-0 mt-0.5">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+            </svg>
+          </div>
+          <div>
+            <p id="banner-title" class="text-sm text-slate-200 leading-relaxed">
+              Your workspace contains <span id="demo-item-count" class="font-bold text-white">32</span>
+              <span class="mx-1 px-2 py-0.5 text-[11px] font-mono font-semibold rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">DEMO</span>
+              sample items. They are illustrative only and never counted as real revenue.
+            </p>
+            <p id="banner-subtext" class="text-xs text-slate-400 mt-0.5">Switch to Live Mode to reset metrics to $0.00 and track real Stripe/business revenue entries.</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <button id="toggle-mode-btn" onclick="toggleWorkspaceMode()" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-100 border border-slate-700 hover:border-amber-500/50 text-xs font-semibold transition flex items-center justify-center gap-2">
+            <span id="toggle-mode-btn-text">Clear demo data &amp; Go Live</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 1: HOME ==================== -->
+    <div id="tab-home" class="tab-view space-y-5">
+
+      <!-- Interactive Visualizer Card (Neural Core 3D Canvas vs Retro Cyber Floorplan) -->
+      <section class="rounded-2xl border border-slate-800 bg-[#0c1018] cyber-grid overflow-hidden shadow-xl">
+        <!-- Visualizer Top Controls -->
+        <div class="p-4 sm:px-6 border-b border-slate-800/80 flex flex-wrap items-center justify-between gap-3 bg-[#090c12]/80">
+          <div>
+            <div class="flex items-center gap-2 text-[11px] font-mono tracking-widest text-cyan-400 uppercase">
+              <span>NEURAL CORE</span>
+              <span>•</span>
+              <span class="text-emerald-400">ONLINE</span>
+              <span class="text-slate-600">|</span>
+              <span id="active-node-indicator" class="text-slate-300">ALL NODES SYNCED</span>
+            </div>
+            <h2 class="text-lg sm:text-xl font-bold text-white mt-0.5">AI Intelligence Network</h2>
+          </div>
+
+          <!-- View Switcher Toggle -->
+          <div class="flex items-center bg-slate-900/90 p-1 rounded-xl border border-slate-800">
+            <button id="btn-view-neural" onclick="setVisualizerMode('neural')" class="px-3 py-1.5 rounded-lg text-xs font-mono font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 transition">
+              3D Neural Core
+            </button>
+            <button id="btn-view-floorplan" onclick="setVisualizerMode('floorplan')" class="px-3 py-1.5 rounded-lg text-xs font-mono font-semibold text-slate-400 hover:text-slate-200 transition">
+              Cyber Floorplan
+            </button>
+          </div>
+        </div>
+
+        <!-- VIEW A: 3D-Style Interactive Neural Core Canvas -->
+        <div id="view-neural-container" class="relative w-full h-[380px] sm:h-[430px] select-none">
+          <canvas id="neural-canvas" class="w-full h-full block cursor-pointer"></canvas>
+
+          <!-- Floating Node Legend / Quick Trigger -->
+          <div class="absolute bottom-3 left-3 right-3 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
+            <div class="px-3 py-1.5 rounded-xl bg-slate-950/85 border border-slate-800/90 backdrop-blur-md text-[11px] font-mono text-slate-400 pointer-events-auto">
+              Tip: Click any orbiting node to inspect &amp; trigger an autonomous cycle
+            </div>
+            <button onclick="triggerNetworkPulse()" class="pointer-events-auto px-3.5 py-1.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/40 text-cyan-300 text-xs font-mono font-semibold transition shadow-neon-cyan">
+              ⚡ Pulse All Agents
+            </button>
+          </div>
+        </div>
+
+        <!-- VIEW B: Retro-Cyber Multi-Room Command Floorplan (Inspired by Screenshot 1) -->
+        <div id="view-floorplan-container" class="hidden relative w-full bg-[#050a07] border-t border-emerald-500/30 p-3 sm:p-5 scanlines">
+          <!-- Retro HUD Top Status Bar -->
+          <div class="flex flex-wrap items-center justify-between gap-2 px-3 py-2 mb-4 rounded-xl bg-emerald-950/40 border border-emerald-500/40 font-mono text-xs text-emerald-400">
+            <div class="flex items-center gap-3">
+              <span class="font-bold tracking-wider">SECTOR 7G // ULTRON REVENUE GRID</span>
+              <span class="hidden sm:inline text-emerald-500/70">THROUGHPUT: 99.4%</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span>WORKSTATIONS: <strong class="text-white">6 ACTIVE</strong></span>
+              <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px]">AUTO-ROUTING</span>
+            </div>
+          </div>
+
+          <!-- Multi-Room Connected Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 relative">
+            <!-- Rooms dynamically populated via JS -->
+            <div id="floorplan-rooms-grid" class="contents"></div>
+          </div>
+
+          <!-- Selected Floorplan Room Inspector Bar -->
+          <div id="floorplan-inspector" class="mt-4 p-3.5 rounded-xl bg-slate-950/90 border border-emerald-500/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <div class="text-[10px] font-mono uppercase text-emerald-400">ACTIVE WORKSTATION INSPECTOR</div>
+              <div id="fp-inspector-title" class="text-sm font-bold text-white">Select any glowing room above to inspect live agent operations</div>
+              <div id="fp-inspector-desc" class="text-xs text-slate-400 mt-0.5">All conduits are actively streaming leads, product builds, and settlement events.</div>
+            </div>
+            <button id="fp-inspector-btn" onclick="triggerNetworkPulse()" class="px-4 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/50 text-emerald-300 font-mono text-xs font-semibold shrink-0 transition">
+              Execute Cycle
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Live KPI Cards -->
+      <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div class="rounded-2xl border border-slate-800 bg-[#0e121b] p-4">
+          <div class="flex items-center justify-between text-xs text-slate-400 font-mono">
+            <span>GROSS MRR</span>
+            <span class="text-emerald-400">↗ +14.2%</span>
+          </div>
+          <div id="kpi-mrr" class="text-xl sm:text-2xl font-bold font-mono text-white mt-2">$0.00</div>
+          <div class="text-[11px] text-slate-500 mt-1">Recurring agent pipelines</div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-800 bg-[#0e121b] p-4">
+          <div class="flex items-center justify-between text-xs text-slate-400 font-mono">
+            <span>NET PROFIT</span>
+            <span class="text-cyan-400">91% MARGIN</span>
+          </div>
+          <div id="kpi-profit" class="text-xl sm:text-2xl font-bold font-mono text-emerald-400 mt-2">$0.00</div>
+          <div class="text-[11px] text-slate-500 mt-1">After API &amp; compute costs</div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-800 bg-[#0e121b] p-4">
+          <div class="flex items-center justify-between text-xs text-slate-400 font-mono">
+            <span>ACTIVE AGENTS</span>
+            <span class="text-purple-400">24/7 ONLINE</span>
+          </div>
+          <div id="kpi-agents" class="text-xl sm:text-2xl font-bold font-mono text-white mt-2">6 / 6</div>
+          <div class="text-[11px] text-slate-500 mt-1">Autonomous micro-workers</div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-800 bg-[#0e121b] p-4">
+          <div class="flex items-center justify-between text-xs text-slate-400 font-mono">
+            <span>CONVERSION</span>
+            <span class="text-amber-400">OPTIMIZED</span>
+          </div>
+          <div id="kpi-conversion" class="text-xl sm:text-2xl font-bold font-mono text-white mt-2">0.0%</div>
+          <div class="text-[11px] text-slate-500 mt-1">Checkout &amp; offer velocity</div>
+        </div>
+      </section>
+
+      <!-- Live Telemetry & Activity Stream -->
+      <section class="rounded-2xl border border-slate-800 bg-[#0e121b] p-4 sm:p-5">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+            <h3 class="text-sm font-bold text-white uppercase tracking-wider font-mono">Live Autonomous Telemetry</h3>
+          </div>
+          <button onclick="switchTab('tasks')" class="text-xs font-mono text-cyan-400 hover:text-cyan-300 transition">View Full Ledger →</button>
+        </div>
+        <div id="home-activity-feed" class="space-y-2 max-h-64 overflow-y-auto pr-1">
+          <!-- Populated dynamically -->
+        </div>
+      </section>
+    </div>
+
+    <!-- ==================== TAB 2: DEPARTMENTS ==================== -->
+    <div id="tab-depts" class="tab-view hidden space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div>
+          <h2 class="text-xl font-bold text-white">Autonomous Departments</h2>
+          <p class="text-xs text-slate-400">Toggle agent nodes, inspect attributed revenue, and execute live workflow cycles.</p>
+        </div>
+        <button onclick="triggerNetworkPulse()" class="px-4 py-2 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 font-mono text-xs font-semibold transition self-start sm:self-auto">
+          Run All Department Cycles
+        </button>
+      </div>
+
+      <div id="departments-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Populated dynamically -->
+      </div>
+    </div>
+
+    <!-- ==================== TAB 3: AI CORE CONSOLE ==================== -->
+    <div id="tab-aicore" class="tab-view hidden space-y-4">
+      <div class="rounded-2xl border border-slate-800 bg-[#0e121b] overflow-hidden flex flex-col h-[560px]">
+        <!-- Console Header -->
+        <div class="p-4 border-b border-slate-800 bg-slate-950/60 flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400 font-mono font-bold text-xs">AI</div>
+            <div>
+              <h2 class="text-sm font-bold text-white">AI Core Strategist &amp; Execution Engine</h2>
+              <p class="text-[11px] font-mono text-slate-400">Issue directives to generate copy, offers, or queue autonomous workflows</p>
+            </div>
+          </div>
+          <span class="px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-mono text-[11px]">MODEL: NEURAL-EXEC v4.2</span>
+        </div>
+
+        <!-- Quick Directive Chips -->
+        <div class="px-4 py-2.5 bg-slate-900/50 border-b border-slate-800/80 flex items-center gap-2 overflow-x-auto">
+          <span class="text-[11px] font-mono text-slate-500 shrink-0">DIRECTIVES:</span>
+          <button onclick="runPresetDirective('Launch high-converting outbound campaign for digital product')" class="shrink-0 px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-cyan-300 border border-slate-700 transition">
+            + Launch Outbound Campaign
+          </button>
+          <button onclick="runPresetDirective('Optimize SaaS & digital guide pricing tiers for +18% AOV')" class="shrink-0 px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-emerald-300 border border-slate-700 transition">
+            + Optimize Pricing Tiers
+          </button>
+          <button onclick="runPresetDirective('Draft a new micro-SaaS / field guide offer and queue for approval')" class="shrink-0 px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-purple-300 border border-slate-700 transition">
+            + Generate Digital Offer
+          </button>
+        </div>
+
+        <!-- Chat / Output Log -->
+        <div id="ai-chat-messages" class="flex-1 p-4 overflow-y-auto space-y-3 font-sans text-sm">
+          <!-- Populated dynamically -->
+        </div>
+
+        <!-- Input Bar -->
+        <form onsubmit="handleAiCommandSubmit(event)" class="p-3 border-t border-slate-800 bg-slate-950/80 flex items-center gap-2">
+          <input id="ai-command-input" type="text" placeholder="Enter strategic directive (e.g., 'Create a $49 flash offer for Marketing')..." class="flex-1 bg-slate-900 border border-slate-700 focus:border-cyan-500 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 outline-none" />
+          <button type="submit" class="px-4 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs font-mono uppercase tracking-wider transition shrink-0">
+            Execute
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ==================== TAB 4: APPROVE QUEUE ==================== -->
+    <div id="tab-approve" class="tab-view hidden space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div>
+          <h2 class="text-xl font-bold text-white">Human-in-the-Loop Approval Gate</h2>
+          <p class="text-xs text-slate-400">High-impact autonomous actions require cryptographic operator sign-off before execution.</p>
+        </div>
+        <button onclick="seedNewApprovalItem()" class="px-3.5 py-2 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/40 text-purple-300 font-mono text-xs font-semibold transition self-start sm:self-auto">
+          + Simulate Agent Proposal
+        </button>
+      </div>
+
+      <div id="approval-queue-list" class="space-y-3">
+        <!-- Populated dynamically -->
+      </div>
+    </div>
+
+    <!-- ==================== TAB 5: TASKS & REVENUE LEDGER ==================== -->
+    <div id="tab-tasks" class="tab-view hidden space-y-5">
+      <!-- Real Revenue Entry & Webhook Config Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <!-- Log Real / Manual Revenue Card -->
+        <div class="lg:col-span-2 rounded-2xl border border-slate-800 bg-[#0e121b] p-4 sm:p-5">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-base font-bold text-white">Record Revenue / Settlement Entry</h3>
+            <span class="text-[11px] font-mono text-emerald-400">INSTANT LEDGER SYNC</span>
+          </div>
+          <form onsubmit="handleAddRevenueSubmit(event)" class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+            <div class="sm:col-span-5">
+              <label class="block text-[11px] font-mono text-slate-400 mb-1">SOURCE / PRODUCT DESCRIPTION</label>
+              <input id="rev-desc" type="text" required placeholder="e.g., Mojito Field Guide Sale #104" class="w-full bg-slate-900 border border-slate-700 focus:border-emerald-500 rounded-xl px-3 py-2 text-sm text-white outline-none" />
+            </div>
+            <div class="sm:col-span-3">
+              <label class="block text-[11px] font-mono text-slate-400 mb-1">DEPARTMENT</label>
+              <select id="rev-dept" class="w-full bg-slate-900 border border-slate-700 focus:border-emerald-500 rounded-xl px-3 py-2 text-sm text-white outline-none">
+                <option value="SALES">Sales</option>
+                <option value="PRODUCTS">Products</option>
+                <option value="MARKETING">Marketing</option>
+                <option value="AI CORE">AI Core</option>
+                <option value="RESEARCH">Research</option>
+                <option value="SUPPORT">Support</option>
+              </select>
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block text-[11px] font-mono text-slate-400 mb-1">AMOUNT ($)</label>
+              <input id="rev-amount" type="number" step="0.01" min="0.50" required placeholder="29.00" class="w-full bg-slate-900 border border-slate-700 focus:border-emerald-500 rounded-xl px-3 py-2 text-sm font-mono text-white outline-none" />
+            </div>
+            <div class="sm:col-span-2 flex items-end">
+              <button type="submit" class="w-full py-2 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs font-mono uppercase transition h-[38px]">
+                + Log
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Payment Webhook & Export Card -->
+        <div class="rounded-2xl border border-slate-800 bg-[#0e121b] p-4 sm:p-5 flex flex-col justify-between space-y-3">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-white">Stripe / Webhook Endpoint</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">READY</span>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-1">Connect your live payment processor webhook to stream real-time checkout events.</p>
+            <div class="mt-2 flex items-center gap-1.5">
+              <input id="webhook-url-input" type="text" readonly value="https://api.neuralcore.local/v1/webhooks/stripe" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-[11px] font-mono text-slate-400 outline-none" />
+              <button onclick="copyWebhookUrl()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-slate-200 shrink-0">Copy</button>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 pt-1">
+            <button onclick="exportData('csv')" class="flex-1 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs font-mono text-slate-200 transition">Export CSV</button>
+            <button onclick="exportData('json')" class="flex-1 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs font-mono text-slate-200 transition">Export JSON</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ledger Table -->
+      <div class="rounded-2xl border border-slate-800 bg-[#0e121b] overflow-hidden">
+        <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+          <h3 class="text-sm font-bold text-white uppercase tracking-wider font-mono">Revenue &amp; Execution Ledger</h3>
+          <span id="ledger-count-label" class="text-xs font-mono text-slate-400">0 entries</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-slate-800/80 text-[11px] font-mono uppercase text-slate-400 bg-slate-950/40">
+                <th class="py-3 px-4">Timestamp</th>
+                <th class="py-3 px-4">Department</th>
+                <th class="py-3 px-4">Event / Description</th>
+                <th class="py-3 px-4">Type</th>
+                <th class="py-3 px-4 text-right">Amount</th>
+              </tr>
+            </thead>
+            <tbody id="ledger-table-body" class="divide-y divide-slate-800/60 text-xs">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Bottom Mobile Navigation Bar (Matches Screenshot 2) -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#090b10]/95 backdrop-blur-lg border-t border-slate-800/90 px-2 py-1.5">
+    <div class="grid grid-cols-5 gap-1 max-w-md mx-auto">
+      <button onclick="switchTab('home')" data-tab="home" class="mobile-nav-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-cyan-400">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+        </svg>
+        <span class="text-[10px] font-medium">Home</span>
+      </button>
+
+      <button onclick="switchTab('depts')" data-tab="depts" class="mobile-nav-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+        </svg>
+        <span class="text-[10px] font-medium">Depts</span>
+      </button>
+
+      <button onclick="switchTab('aicore')" data-tab="aicore" class="mobile-nav-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+        </svg>
+        <span class="text-[10px] font-medium">AI</span>
+      </button>
+
+      <button onclick="switchTab('approve')" data-tab="approve" class="mobile-nav-btn relative flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400">
+        <span id="mobile-approve-dot" class="absolute top-1.5 right-4 w-2 h-2 rounded-full bg-purple-400"></span>
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        </svg>
+        <span class="text-[10px] font-medium">Approve</span>
+      </button>
+
+      <button onclick="switchTab('tasks')" data-tab="tasks" class="mobile-nav-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+        </svg>
+        <span class="text-[10px] font-medium">Tasks</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Application Logic & Interactive Neural Canvas -->
+  <script>
+    // ==================== STATE MANAGEMENT & STORAGE ====================
+    const STORAGE_KEY = 'neural_command_center_v1';
+
+    const DEFAULT_DEPARTMENTS = [
+      {
+        id: 'products',
+        name: 'PRODUCTS',
+        agentName: 'Forge-01',
+        role: 'Digital Asset & SKU Builder',
+        color: '#a855f7',
+        badgeClass: 'text-purple-400 bg-purple-500/15 border-purple-500/40',
+        active: true,
+        demoRevenue: 4250.00,
+        liveRevenue: 0,
+        tasksCompleted: 14,
+        currentTask: 'Packaging A6 printable recipe & micro-guide bundles'
+      },
+      {
+        id: 'research',
+        name: 'RESEARCH',
+        agentName: 'Scout-X',
+        role: 'Market Gap & Trend Intelligence',
+        color: '#00f0ff',
+        badgeClass: 'text-cyan-400 bg-cyan-500/15 border-cyan-500/40',
+        active: true,
+        demoRevenue: 1180.00,
+        liveRevenue: 0,
+        tasksCompleted: 29,
+        currentTask: 'Scanning high-intent buyer keywords & niche demand'
+      },
+      {
+        id: 'aicore',
+        name: 'AI CORE',
+        agentName: 'Nexus-Prime',
+        role: 'Orchestration & Copy Synthesis',
+        color: '#ec4899',
+        badgeClass: 'text-pink-400 bg-pink-500/15 border-pink-500/40',
+        active: true,
+        demoRevenue: 2640.00,
+        liveRevenue: 0,
+        tasksCompleted: 42,
+        currentTask: 'Routing cross-department conversion prompts'
+      },
+      {
+        id: 'finance',
+        name: 'FINANCE',
+        agentName: 'Ledger-9',
+        role: 'Margin, Pricing & Settlement',
+        color: '#f59e0b',
+        badgeClass: 'text-amber-400 bg-amber-500/15 border-amber-500/40',
+        active: true,
+        demoRevenue: 1890.00,
+        liveRevenue: 0,
+        tasksCompleted: 19,
+        currentTask: 'Auditing net margin & Stripe payout velocity'
+      },
+      {
+        id: 'sales',
+        name: 'SALES',
+        agentName: 'Closer-V',
+        role: 'Outbound & Checkout Conversion',
+        color: '#10b981',
+        badgeClass: 'text-emerald-400 bg-emerald-500/15 border-emerald-500/40',
+        active: true,
+        demoRevenue: 6420.00,
+        liveRevenue: 0,
+        tasksCompleted: 53,
+        currentTask: 'Converting abandoned carts & B2B license inquiries'
+      },
+      {
+        id: 'marketing',
+        name: 'MARKETING',
+        agentName: 'Pulse-M',
+        role: 'Distribution & Funnel Growth',
+        color: '#fb923c',
+        badgeClass: 'text-orange-400 bg-orange-500/15 border-orange-500/40',
+        active: true,
+        demoRevenue: 3120.00,
+        liveRevenue: 0,
+        tasksCompleted: 37,
+        currentTask: 'Deploying social proof snippets & SEO landing cards'
+      }
+    ];
+
+    const DEFAULT_APPROVALS = [
+      {
+        id: 'app-1',
+        dept: 'MARKETING',
+        title: 'Deploy Automated Retargeting Sequence ($45 Budget)',
+        impact: '+$320.00 projected revenue',
+        amount: 320.00,
+        risk: 'LOW',
+        timestamp: '2m ago'
+      },
+      {
+        id: 'app-2',
+        dept: 'PRODUCTS',
+        title: 'Publish "Pro Bar & Venue Bundle v2.1" to Storefront',
+        impact: '+$149.00 per venue license',
+        amount: 149.00,
+        risk: 'LOW',
+        timestamp: '11m ago'
+      },
+      {
+        id: 'app-3',
+        dept: 'SALES',
+        title: 'Send Custom Bulk Invoice to Hospitality Group (12 Seats)',
+        impact: '+$588.00 direct settlement',
+        amount: 588.00,
+        risk: 'MEDIUM',
+        timestamp: '24m ago'
+      },
+      {
+        id: 'app-4',
+        dept: 'FINANCE',
+        title: 'Activate Dynamic Tiered Pricing (+12% Weekend Surge)',
+        impact: '+$210.00 weekly margin lift',
+        amount: 210.00,
+        risk: 'LOW',
+        timestamp: '41m ago'
+      }
+    ];
+
+    const DEFAULT_LEDGER = [
+      { id: 'tx-101', time: '10:02 PM', dept: 'SALES', desc: 'Storefront Checkout • Digital Field Guide Pro', type: 'DEMO', amount: 49.00 },
+      { id: 'tx-102', time: '09:48 PM', dept: 'PRODUCTS', desc: 'Venue Commercial License #882', type: 'DEMO', amount: 149.00 },
+      { id: 'tx-103', time: '09:15 PM', dept: 'MARKETING', desc: 'Organic Funnel Conversion • Bundle Pack', type: 'DEMO', amount: 79.00 },
+      { id: 'tx-104', time: '08:50 PM', dept: 'AI CORE', desc: 'Automated Upsell Sequence Settlement', type: 'DEMO', amount: 35.00 },
+      { id: 'tx-105', time: '08:12 PM', dept: 'FINANCE', desc: 'Subscription Renewal • Enterprise Tier', type: 'DEMO', amount: 199.00 }
+    ];
+
+    let state = loadState();
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (e) {
+        console.warn('Storage load fallback', e);
+      }
+      return {
+        isDemo: true,
+        activeTab: 'home',
+        visualizerMode: 'neural',
+        departments: JSON.parse(JSON.stringify(DEFAULT_DEPARTMENTS)),
+        approvals: JSON.parse(JSON.stringify(DEFAULT_APPROVALS)),
+        ledger: JSON.parse(JSON.stringify(DEFAULT_LEDGER)),
+        chatHistory: [
+          {
+            sender: 'ai',
+            text: 'NEURAL CORE ONLINE. All 6 autonomous departments are synchronized. Issue a strategic directive above or type a command to generate real marketing copy, pricing models, or revenue workflows.'
+          }
+        ]
+      };
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        console.warn('Storage save error', e);
+      }
+    }
+
+    // ==================== CORE RENDER & UI UPDATES ====================
+    function formatCurrency(num) {
+      return '$' + Number(num || 0).toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function showToast(title, subtitle = '', accent = 'cyan') {
+      const container = document.getElementById('toast-container');
+      const colors = {
+        cyan: 'border-cyan-500/50 bg-slate-950/95 text-cyan-300',
+        emerald: 'border-emerald-500/50 bg-slate-950/95 text-emerald-300',
+        amber: 'border-amber-500/50 bg-slate-950/95 text-amber-300',
+        purple: 'border-purple-500/50 bg-slate-950/95 text-purple-300'
+      };
+      const toast = document.createElement('div');
+      toast.className = `pointer-events-auto rounded-xl border ${colors[accent] || colors.cyan} p-3 shadow-2xl backdrop-blur-md transition-all duration-300 transform translate-y-0 opacity-100`;
+      toast.innerHTML = `
+        <div class="text-xs font-mono font-bold">${title}</div>
+        ${subtitle ? `<div class="text-[11px] text-slate-300 mt-0.5">${subtitle}</div>` : ''}
+      `;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-8px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 3200);
+    }
+
+    function getTotalRevenue() {
+      return state.departments.reduce((sum, d) => {
+        return sum + (state.isDemo ? d.demoRevenue : d.liveRevenue);
+      }, 0);
+    }
+
+    function renderAll() {
+      const totalRev = getTotalRevenue();
+      const activeAgentsCount = state.departments.filter(d => d.active).length;
+
+      // Header Ticker & Mode Pill
+      document.getElementById('live-revenue-ticker').textContent = formatCurrency(totalRev);
+      const modePill = document.getElementById('mode-pill');
+      const revLabel = document.getElementById('revenue-label');
+      const banner = document.getElementById('mode-banner');
+      const bannerTitle = document.getElementById('banner-title');
+      const bannerSub = document.getElementById('banner-subtext');
+      const toggleBtnText = document.getElementById('toggle-mode-btn-text');
+
+      if (state.isDemo) {
+        modePill.textContent = 'DEMO';
+        modePill.className = 'text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30';
+        revLabel.textContent = 'SIMULATED REV';
+        banner.className = 'rounded-2xl border border-amber-500/35 bg-gradient-to-r from-amber-950/30 via-[#13110c] to-slate-900/60 p-4 shadow-neon-amber transition-all';
+        bannerTitle.innerHTML = `Your workspace contains <span class="font-bold text-white">${state.ledger.length + 27}</span> <span class="mx-1 px-2 py-0.5 text-[11px] font-mono font-semibold rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">DEMO</span> sample items. They are illustrative only and never counted as real revenue.`;
+        bannerSub.textContent = 'Switch to Live Mode to reset metrics to $0.00 and track real Stripe/business revenue entries.';
+        toggleBtnText.textContent = 'Clear demo data & Go Live';
+      } else {
+        modePill.textContent = 'LIVE';
+        modePill.className = 'text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30';
+        revLabel.textContent = 'REAL REVENUE';
+        banner.className = 'rounded-2xl border border-emerald-500/35 bg-gradient-to-r from-emerald-950/30 via-[#0c1412] to-slate-900/60 p-4 shadow-neon-emerald transition-all';
+        bannerTitle.innerHTML = `Workspace is in <span class="mx-1 px-2 py-0.5 text-[11px] font-mono font-semibold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">LIVE</span> production mode. Every logged settlement is tracked as real business revenue.`;
+        bannerSub.textContent = 'Use the Tasks & Ledger tab to record real sales or connect your Stripe webhook endpoint.';
+        toggleBtnText.textContent = 'Restore Demo Sample Data';
+      }
+
+      // KPIs
+      document.getElementById('kpi-mrr').textContent = formatCurrency(totalRev);
+      document.getElementById('kpi-profit').textContent = formatCurrency(totalRev * 0.91);
+      document.getElementById('kpi-agents').textContent = `${activeAgentsCount} / ${state.departments.length}`;
+      document.getElementById('kpi-conversion').textContent = totalRev > 0 ? (state.isDemo ? '4.8%' : '3.6%') : '0.0%';
+
+      // Approval Badges
+      const pendingCount = state.approvals.length;
+      const headerBadge = document.getElementById('header-notif-badge');
+      const desktopBadge = document.getElementById('desktop-approve-badge');
+      const mobileDot = document.getElementById('mobile-approve-dot');
+
+      headerBadge.textContent = pendingCount;
+      headerBadge.style.display = pendingCount > 0 ? 'flex' : 'none';
+      desktopBadge.textContent = pendingCount;
+      desktopBadge.style.display = pendingCount > 0 ? 'inline-block' : 'none';
+      mobileDot.style.display = pendingCount > 0 ? 'block' : 'none';
+
+      renderFloorplanRooms();
+      renderDepartments();
+      renderApprovals();
+      renderLedgerAndFeed();
+      renderChatMessages();
+    }
+
+    // ==================== NAVIGATION & MODE TOGGLES ====================
+    function switchTab(tabId) {
+      state.activeTab = tabId;
+      saveState();
+
+      document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
+      const activeEl = document.getElementById(`tab-${tabId}`);
+      if (activeEl) activeEl.classList.remove('hidden');
+
+      // Desktop nav styles
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        if (btn.dataset.tab === tabId) {
+          btn.className = 'nav-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 bg-cyan-500/20 text-cyan-300 border border-cyan-500/40';
+        } else {
+          btn.className = 'nav-btn px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 text-slate-400 hover:text-slate-200';
+        }
+      });
+
+      // Mobile nav styles
+      document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
+        if (btn.dataset.tab === tabId) {
+          btn.classList.remove('text-slate-400');
+          btn.classList.add('text-cyan-400');
+        } else {
+          btn.classList.remove('text-cyan-400');
+          btn.classList.add('text-slate-400');
+        }
+      });
+
+      if (tabId === 'home' && state.visualizerMode === 'neural') {
+        resizeNeuralCanvas();
+      }
+    }
+
+    function toggleWorkspaceMode() {
+      state.isDemo = !state.isDemo;
+      if (!state.isDemo) {
+        // Switching to clean Live Mode
+        state.ledger = state.ledger.filter(item => item.type === 'LIVE');
+        showToast('LIVE MODE ACTIVATED', 'Demo figures cleared. Workspace reset to real-world tracking.', 'emerald');
+      } else {
+        // Restoring Demo Data
+        state.departments = JSON.parse(JSON.stringify(DEFAULT_DEPARTMENTS));
+        state.ledger = JSON.parse(JSON.stringify(DEFAULT_LEDGER));
+        state.approvals = JSON.parse(JSON.stringify(DEFAULT_APPROVALS));
+        showToast('DEMO DATA RESTORED', 'Loaded 32 sample telemetry & revenue items.', 'amber');
+      }
+      saveState();
+      renderAll();
+    }
+
+    function setVisualizerMode(mode) {
+      state.visualizerMode = mode;
+      saveState();
+
+      const neuralContainer = document.getElementById('view-neural-container');
+      const floorplanContainer = document.getElementById('view-floorplan-container');
+      const btnNeural = document.getElementById('btn-view-neural');
+      const btnFloor = document.getElementById('btn-view-floorplan');
+
+      if (mode === 'neural') {
+        neuralContainer.classList.remove('hidden');
+        floorplanContainer.classList.add('hidden');
+        btnNeural.className = 'px-3 py-1.5 rounded-lg text-xs font-mono font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 transition';
+        btnFloor.className = 'px-3 py-1.5 rounded-lg text-xs font-mono font-semibold text-slate-400 hover:text-slate-200 transition';
+        resizeNeuralCanvas();
+      } else {
+        neuralContainer.classList.add('hidden');
+        floorplanContainer.classList.remove('hidden');
+        btnFloor.className = 'px-3 py-1.5 rounded-lg text-xs font-mono font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 transition';
+        btnNeural.className = 'px-3 py-1.5 rounded-lg text-xs font-mono font-semibold text-slate-400 hover:text-slate-200 transition';
+      }
+    }
+
+    // ==================== RETRO FLOORPLAN RENDERER ====================
+    function renderFloorplanRooms() {
+      const grid = document.getElementById('floorplan-rooms-grid');
+      if (!grid) return;
+
+      grid.innerHTML = state.departments.map((dept, idx) => {
+        const rev = state.isDemo ? dept.demoRevenue : dept.liveRevenue;
+        const borderColors = [
+          'border-amber-500/60 shadow-[0_0_15px_rgba(245,158,11,0.18)]',
+          'border-emerald-500/60 shadow-[0_0_15px_rgba(16,185,129,0.2)]',
+          'border-cyan-500/60 shadow-[0_0_15px_rgba(0,240,255,0.18)]',
+          'border-purple-500/60 shadow-[0_0_15px_rgba(168,85,247,0.18)]',
+          'border-rose-500/60 shadow-[0_0_15px_rgba(244,63,94,0.18)]',
+          'border-orange-500/60 shadow-[0_0_15px_rgba(251,146,60,0.18)]'
+        ];
+        const cardStyle = borderColors[idx % borderColors.length];
+
+        return `
+          <div onclick="inspectFloorplanRoom('${dept.id}')" class="cursor-pointer rounded-xl bg-[#080d0b] border-2 ${cardStyle} p-3.5 hover:scale-[1.01] transition-all relative overflow-hidden">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-mono text-xs font-bold tracking-wider text-white flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full ${dept.active ? 'bg-emerald-400 animate-ping' : 'bg-slate-600'}"></span>
+                ${dept.name} BAY
+              </span>
+              <span class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-slate-900 text-slate-300 border border-slate-700">${dept.agentName}</span>
+            </div>
+
+            <!-- Simulated Pixel Workstation Visual -->
+            <div class="grid grid-cols-4 gap-1.5 my-2.5 p-2 rounded-lg bg-black/60 border border-slate-800/80 font-mono text-[10px]">
+              <div class="col-span-2 bg-slate-900/90 p-1.5 rounded border border-slate-800 text-emerald-400 truncate">
+                > ${dept.active ? 'EXEC_LOOP' : 'STANDBY'}
+              </div>
+              <div class="col-span-2 bg-slate-900/90 p-1.5 rounded border border-slate-800 text-right text-white font-bold">
+                ${formatCurrency(rev)}
+              </div>
+              <div class="col-span-4 text-slate-400 truncate pt-0.5">
+                ${dept.currentTask}
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between text-[10px] font-mono text-slate-400">
+              <span>CYCLES: ${dept.tasksCompleted}</span>
+              <span class="text-emerald-400">CLICK TO INSPECT →</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function inspectFloorplanRoom(deptId) {
+      const dept = state.departments.find(d => d.id === deptId);
+      if (!dept) return;
+      const rev = state.isDemo ? dept.demoRevenue : dept.liveRevenue;
+      document.getElementById('fp-inspector-title').textContent = `${dept.name} WORKSTATION • Agent ${dept.agentName} (${formatCurrency(rev)})`;
+      document.getElementById('fp-inspector-desc').textContent = `Current Directive: ${dept.currentTask} — ${dept.tasksCompleted} cycles completed.`;
+      const btn = document.getElementById('fp-inspector-btn');
+      btn.textContent = `Run ${dept.name} Cycle`;
+      btn.onclick = () => runSingleAgentCycle(dept.id);
+    }
+
+    // ==================== DEPARTMENTS & AGENT CYCLES ====================
+    function renderDepartments() {
+      const grid = document.getElementById('departments-grid');
+      if (!grid) return;
+
+      grid.innerHTML = state.departments.map(dept => {
+        const rev = state.isDemo ? dept.demoRevenue : dept.liveRevenue;
+        return `
+          <div class="rounded-2xl border border-slate-800 bg-[#0e121b] p-4 flex flex-col justify-between gap-4 hover:border-slate-700 transition">
+            <div>
+              <div class="flex items-center justify-between gap-2">
+                <span class="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold border ${dept.badgeClass}">
+                  ● ${dept.name}
+                </span>
+                <label class="inline-flex items-center cursor-pointer">
+                  <input type="checkbox" ${dept.active ? 'checked' : ''} onchange="toggleAgentStatus('${dept.id}')" class="sr-only peer">
+                  <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-300 after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500 relative"></div>
+                </label>
+              </div>
+
+              <div class="mt-3 flex items-baseline justify-between">
+                <div>
+                  <h3 class="text-base font-bold text-white">${dept.agentName}</h3>
+                  <p class="text-xs text-slate-400">${dept.role}</p>
+                </div>
+                <div class="text-right">
+                  <div class="text-[10px] font-mono text-slate-500">ATTRIBUTED</div>
+                  <div class="font-mono font-bold text-emerald-400 text-sm">${formatCurrency(rev)}</div>
+                </div>
+              </div>
+
+              <div class="mt-3 p-2.5 rounded-xl bg-slate-950/70 border border-slate-800/80 text-xs text-slate-300">
+                <span class="text-[10px] font-mono text-slate-500 block mb-0.5">ACTIVE WORKFLOW:</span>
+                ${dept.currentTask}
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-2 border-t border-slate-800/80">
+              <span class="text-[11px] font-mono text-slate-400">${dept.tasksCompleted} runs</span>
+              <button onclick="runSingleAgentCycle('${dept.id}')" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-cyan-500/40 text-xs font-mono text-cyan-300 transition">
+                ⚡ Run Agent Cycle
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleAgentStatus(deptId) {
+      const dept = state.departments.find(d => d.id === deptId);
+      if (!dept) return;
+      dept.active = !dept.active;
+      saveState();
+      renderAll();
+      showToast(`${dept.agentName} (${dept.name})`, dept.active ? 'Agent brought ONLINE' : 'Agent placed in STANDBY', dept.active ? 'emerald' : 'amber');
+    }
+
+    function runSingleAgentCycle(deptId) {
+      const dept = state.departments.find(d => d.id === deptId);
+      if (!dept) return;
+      if (!dept.active) {
+        showToast(`${dept.agentName} is Offline`, 'Enable the agent toggle first to run a cycle.', 'amber');
+        return;
+      }
+
+      const generated = Number((Math.floor(Math.random() * 65) + 19).toFixed(2));
+      dept.tasksCompleted += 1;
+      if (state.isDemo) {
+        dept.demoRevenue += generated;
+      } else {
+        dept.liveRevenue += generated;
+      }
+
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      state.ledger.unshift({
+        id: 'tx-' + Date.now(),
+        time: timeStr,
+        dept: dept.name,
+        desc: `${dept.agentName} Cycle • ${dept.currentTask.slice(0, 38)}...`,
+        type: state.isDemo ? 'DEMO' : 'LIVE',
+        amount: generated
+      });
+
+      // Trigger visual pulse on canvas
+      spawnPulseForDept(dept.id);
+      document.getElementById('active-node-indicator').textContent = `${dept.name} PULSE +${formatCurrency(generated)}`;
+
+      saveState();
+      renderAll();
+      showToast(`${dept.name} Cycle Complete`, `${dept.agentName} generated +${formatCurrency(generated)}`, 'emerald');
+    }
+
+    function triggerNetworkPulse() {
+      const activeDepts = state.departments.filter(d => d.active);
+      if (activeDepts.length === 0) {
+        showToast('No Active Agents', 'Turn on at least one department agent.', 'amber');
+        return;
+      }
+      let totalBoost = 0;
+      activeDepts.forEach(dept => {
+        const gain = Number((Math.floor(Math.random() * 35) + 12).toFixed(2));
+        totalBoost += gain;
+        dept.tasksCompleted += 1;
+        if (state.isDemo) dept.demoRevenue += gain;
+        else dept.liveRevenue += gain;
+        spawnPulseForDept(dept.id);
+      });
+
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      state.ledger.unshift({
+        id: 'tx-' + Date.now(),
+        time: timeStr,
+        dept: 'AI CORE',
+        desc: `Full Network Swarm Execution (${activeDepts.length} nodes)`,
+        type: state.isDemo ? 'DEMO' : 'LIVE',
+        amount: totalBoost
+      });
+
+      document.getElementById('active-node-indicator').textContent = `SWARM SYNC +${formatCurrency(totalBoost)}`;
+      saveState();
+      renderAll();
+      showToast('SWARM PULSE EXECUTED', `All ${activeDepts.length} active nodes generated +${formatCurrency(totalBoost)}`, 'cyan');
+    }
+
+    // ==================== AI CORE CONSOLE ====================
+    function renderChatMessages() {
+      const container = document.getElementById('ai-chat-messages');
+      if (!container) return;
+
+      container.innerHTML = state.chatHistory.map(msg => {
+        if (msg.sender === 'user') {
+          return `
+            <div class="flex justify-end">
+              <div class="max-w-[82%] rounded-2xl rounded-tr-sm bg-cyan-500/20 border border-cyan-500/40 px-4 py-2.5 text-slate-100">
+                <div class="text-[10px] font-mono text-cyan-400 mb-0.5">OPERATOR</div>
+                <div>${msg.text}</div>
+              </div>
+            </div>
+          `;
+        }
+        return `
+          <div class="flex justify-start">
+            <div class="max-w-[88%] rounded-2xl rounded-tl-sm bg-slate-900 border border-slate-800 px-4 py-3 text-slate-200">
+              <div class="text-[10px] font-mono text-purple-400 mb-1">NEURAL CORE • RESPONSE</div>
+              <div class="whitespace-pre-line leading-relaxed text-xs sm:text-sm">${msg.text}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function runPresetDirective(text) {
+      document.getElementById('ai-command-input').value = text;
+      handleAiCommandSubmit(new Event('submit'));
+    }
+
+    function handleAiCommandSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('ai-command-input');
+      const query = input.value.trim();
+      if (!query) return;
+
+      state.chatHistory.push({ sender: 'user', text: query });
+      input.value = '';
+
+      // Generate smart contextual action & queue an approval item
+      const estValue = Number((Math.floor(Math.random() * 250) + 95).toFixed(2));
+      const newProposal = {
+        id: 'app-' + Date.now(),
+        dept: 'AI CORE',
+        title: `Execute Directive: "${query.slice(0, 48)}${query.length > 48 ? '...' : ''}"`,
+        impact: `+${formatCurrency(estValue)} projected settlement`,
+        amount: estValue,
+        risk: 'LOW',
+        timestamp: 'Just now'
+      };
+      state.approvals.unshift(newProposal);
+
+      const responseText = `Directive analyzed and compiled into an actionable execution package:\n\n1. Target Funnel: High-intent digital buyers & venue operators\n2. Automated Copy & Offer Hook generated by Nexus-Prime\n3. Projected Revenue Lift: +${formatCurrency(estValue)}\n\n→ Queued in the [Approve] tab for your 1-click sign-off.`;
+      state.chatHistory.push({ sender: 'ai', text: responseText });
+
+      saveState();
+      renderAll();
+      showToast('DIRECTIVE COMPILED', 'New action queued in Approve tab for sign-off.', 'purple');
+    }
+
+    // ==================== HUMAN-IN-THE-LOOP APPROVALS ====================
+    function renderApprovals() {
+      const container = document.getElementById('approval-queue-list');
+      if (!container) return;
+
+      if (state.approvals.length === 0) {
+        container.innerHTML = `
+          <div class="rounded-2xl border border-slate-800 bg-[#0e121b] p-8 text-center">
+            <div class="text-emerald-400 font-mono text-sm font-bold">ALL CLEAR • ZERO PENDING APPROVALS</div>
+            <p class="text-xs text-slate-400 mt-1">Autonomous agents are operating within pre-approved guardrails.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = state.approvals.map(item => `
+        <div class="rounded-2xl border border-slate-800 bg-[#0e121b] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30">${item.dept}</span>
+              <span class="text-[11px] font-mono text-slate-500">${item.timestamp}</span>
+              <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-900 text-slate-400 border border-slate-800">RISK: ${item.risk}</span>
+            </div>
+            <h3 class="text-sm sm:text-base font-bold text-white">${item.title}</h3>
+            <p class="text-xs font-mono text-emerald-400">${item.impact}</p>
+          </div>
+
+          <div class="flex items-center gap-2 shrink-0">
+            <button onclick="resolveApproval('${item.id}', false)" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-rose-950/50 border border-slate-700 hover:border-rose-500/50 text-xs font-mono text-slate-300 hover:text-rose-300 transition">
+              Reject
+            </button>
+            <button onclick="resolveApproval('${item.id}', true)" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs font-mono uppercase transition shadow-neon-emerald">
+              ✓ Approve &amp; Execute
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function resolveApproval(id, approved) {
+      const idx = state.approvals.findIndex(a => a.id === id);
+      if (idx === -1) return;
+      const [item] = state.approvals.splice(idx, 1);
+
+      if (approved) {
+        const targetDept = state.departments.find(d => d.name === item.dept) || state.departments[0];
+        if (state.isDemo) targetDept.demoRevenue += item.amount;
+        else targetDept.liveRevenue += item.amount;
+        targetDept.tasksCompleted += 1;
+
+        const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        state.ledger.unshift({
+          id: 'tx-' + Date.now(),
+          time: timeStr,
+          dept: item.dept,
+          desc: `Approved: ${item.title}`,
+          type: state.isDemo ? 'DEMO' : 'LIVE',
+          amount: item.amount
+        });
+
+        spawnPulseForDept(targetDept.id);
+        showToast('ACTION APPROVED & EXECUTED', `Settled +${formatCurrency(item.amount)} to ${item.dept}`, 'emerald');
+      } else {
+        showToast('PROPOSAL REJECTED', `Blocked: ${item.title}`, 'amber');
+      }
+
+      saveState();
+      renderAll();
+    }
+
+    function seedNewApprovalItem() {
+      const samples = [
+        { dept: 'SALES', title: 'Close 5-Pack Commercial Venue License Deal', amount: 395.00 },
+        { dept: 'PRODUCTS', title: 'Release Printable Cocktail & Syrup Matrix PDF', amount: 129.00 },
+        { dept: 'MARKETING', title: 'Syndicate Viral Short-Form Funnel Hook', amount: 240.00 }
+      ];
+      const pick = samples[Math.floor(Math.random() * samples.length)];
+      state.approvals.unshift({
+        id: 'app-' + Date.now(),
+        dept: pick.dept,
+        title: pick.title,
+        impact: `+${formatCurrency(pick.amount)} projected revenue`,
+        amount: pick.amount,
+        risk: 'LOW',
+        timestamp: 'Just now'
+      });
+      saveState();
+      renderAll();
+      showToast('NEW PROPOSAL QUEUED', pick.title, 'purple');
+    }
+
+    // ==================== LEDGER, REAL REVENUE & EXPORTS ====================
+    function handleAddRevenueSubmit(e) {
+      e.preventDefault();
+      const desc = document.getElementById('rev-desc').value.trim();
+      const deptName = document.getElementById('rev-dept').value;
+      const amount = parseFloat(document.getElementById('rev-amount').value);
+
+      if (!desc || isNaN(amount) || amount <= 0) return;
+
+      const dept = state.departments.find(d => d.name === deptName) || state.departments[0];
+      if (state.isDemo) dept.demoRevenue += amount;
+      else dept.liveRevenue += amount;
+      dept.tasksCompleted += 1;
+
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      state.ledger.unshift({
+        id: 'tx-' + Date.now(),
+        time: timeStr,
+        dept: deptName,
+        desc: desc,
+        type: state.isDemo ? 'DEMO' : 'LIVE',
+        amount: amount
+      });
+
+      document.getElementById('rev-desc').value = '';
+      document.getElementById('rev-amount').value = '';
+
+      spawnPulseForDept(dept.id);
+      saveState();
+      renderAll();
+      showToast('REVENUE RECORDED', `+${formatCurrency(amount)} credited to ${deptName}`, 'emerald');
+    }
+
+    function renderLedgerAndFeed() {
+      const tbody = document.getElementById('ledger-table-body');
+      const feed = document.getElementById('home-activity-feed');
+      const countLabel = document.getElementById('ledger-count-label');
+
+      countLabel.textContent = `${state.ledger.length} entries`;
+
+      if (state.ledger.length === 0) {
+        const emptyHtml = `<div class="p-6 text-center text-xs font-mono text-slate-500">No entries recorded yet. Log a real sale in Tasks &amp; Ledger or run an Agent Cycle.</div>`;
+        if (feed) feed.innerHTML = emptyHtml;
+        if (tbody) tbody.innerHTML = `<tr><td colspan="5">${emptyHtml}</td></tr>`;
+        return;
+      }
+
+      if (feed) {
+        feed.innerHTML = state.ledger.slice(0, 6).map(tx => `
+          <div class="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-slate-950/60 border border-slate-800/70 text-xs">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-900 text-cyan-300 border border-slate-800 shrink-0">${tx.dept}</span>
+              <span class="text-slate-200 truncate">${tx.desc}</span>
+            </div>
+            <div class="flex items-center gap-2.5 shrink-0 font-mono">
+              <span class="text-[10px] text-slate-500 hidden sm:inline">${tx.time}</span>
+              <span class="text-emerald-400 font-bold">+${formatCurrency(tx.amount)}</span>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      if (tbody) {
+        tbody.innerHTML = state.ledger.map(tx => `
+          <tr class="hover:bg-slate-900/40 transition">
+            <td class="py-3 px-4 font-mono text-slate-400 whitespace-nowrap">${tx.time}</td>
+            <td class="py-3 px-4 font-mono"><span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-cyan-300 text-[11px]">${tx.dept}</span></td>
+            <td class="py-3 px-4 text-slate-200">${tx.desc}</td>
+            <td class="py-3 px-4 font-mono">
+              <span class="px-2 py-0.5 rounded-full text-[10px] ${tx.type === 'LIVE' ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/15 text-amber-400 border border-amber-500/30'}">${tx.type}</span>
+            </td>
+            <td class="py-3 px-4 text-right font-mono font-bold text-emerald-400 whitespace-nowrap">+${formatCurrency(tx.amount)}</td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    function copyWebhookUrl() {
+      const input = document.getElementById('webhook-url-input');
+      input.select();
+      document.execCommand('copy');
+      showToast('WEBHOOK COPIED', 'Endpoint URL copied to clipboard.', 'cyan');
+    }
+
+    function exportData(format) {
+      let content = '';
+      let mime = 'text/plain';
+      let filename = `neural-revenue-ledger.${format}`;
+
+      if (format === 'json') {
+        content = JSON.stringify({ mode: state.isDemo ? 'DEMO' : 'LIVE', totalRevenue: getTotalRevenue(), ledger: state.ledger }, null, 2);
+        mime = 'application/json';
+      } else {
+        const rows = [['ID', 'Time', 'Department', 'Description', 'Mode', 'Amount']];
+        state.ledger.forEach(tx => rows.push([tx.id, tx.time, tx.dept, `"${tx.desc.replace(/"/g, '""')}"`, tx.type, tx.amount.toFixed(2)]));
+        content = rows.map(r => r.join(',')).join('\n');
+        mime = 'text/csv';
+      }
+
+      const blob = new Blob([content], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('EXPORT COMPLETE', `Downloaded ${filename}`, 'cyan');
+    }
+
+    // ==================== 3D-STYLE INTERACTIVE NEURAL CORE CANVAS ====================
+    const canvas = document.getElementById('neural-canvas');
+    const ctx = canvas.getContext('2d');
+    let canvasW = 800;
+    let canvasH = 420;
+    let orbRotation = 0;
+    let activePulses = [];
+    let renderedNodeHitboxes = [];
+
+    // Generate 3D geodesic-like sphere vertices for the central SUPPORT / NEURAL CORE orb
+    const sphereVertices = [];
+    const rings = 7;
+    const perRing = 12;
+    for (let r = 1; r < rings; r++) {
+      const phi = (Math.PI * r) / rings;
+      for (let p = 0; p < perRing; p++) {
+        const theta = (2 * Math.PI * p) / perRing;
+        sphereVertices.push({
+          x: Math.sin(phi) * Math.cos(theta),
+          y: Math.cos(phi),
+          z: Math.sin(phi) * Math.sin(theta)
+        });
+      }
+    }
+
+    // Orbiting Department Node layout presets (matching Screenshot 2 spatial layout)
+    const nodeLayout = [
+      { id: 'products', label: 'PRODUCTS', color: '#a855f7', rx: -0.34, ry: -0.26 },
+      { id: 'research', label: 'RESEARCH', color: '#00f0ff', rx: 0.30, ry: -0.31 },
+      { id: 'aicore',   label: 'AI CORE',  color: '#ec4899', rx: 0.43, ry: -0.11 },
+      { id: 'finance',  label: 'FINANCE',  color: '#f59e0b', rx: 0.28, ry: 0.08 },
+      { id: 'marketing',label: 'MARKETING',color: '#fb923c', rx: -0.41, ry: 0.14 },
+      { id: 'sales',    label: 'SALES',    color: '#10b981', rx: -0.25, ry: 0.29 }
+    ];
+
+    function resizeNeuralCanvas() {
+      const container = document.getElementById('view-neural-container');
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvasW = rect.width || 600;
+      canvasH = rect.height || 400;
+      canvas.width = canvasW * dpr;
+      canvas.height = canvasH * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function spawnPulseForDept(deptId) {
+      const layout = nodeLayout.find(n => n.id === deptId);
+      if (!layout) return;
+      activePulses.push({
+        deptId,
+        color: layout.color,
+        progress: 0,
+        speed: 0.025 + Math.random() * 0.015
+      });
+    }
+
+    function drawNeuralNetwork() {
+      ctx.clearRect(0, 0, canvasW, canvasH);
+
+      const cx = canvasW / 2;
+      const cy = canvasH / 2 + 8;
+      const orbRadius = Math.min(canvasW, canvasH) * 0.17;
+
+      // 1. Central Ambient Radial Glow
+      const grad = ctx.createRadialGradient(cx, cy, 4, cx, cy, orbRadius * 2.1);
+      grad.addColorStop(0, 'rgba(0, 240, 255, 0.22)');
+      grad.addColorStop(0.5, 'rgba(16, 185, 129, 0.06)');
+      grad.addColorStop(1, 'rgba(9, 11, 16, 0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(cx, cy, orbRadius * 2.1, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 2. Compute Orbiting Node Coordinates & Draw Synaptic Conduits
+      const spreadX = Math.min(canvasW * 0.88, 680);
+      const spreadY = Math.min(canvasH * 0.85, 340);
+      renderedNodeHitboxes = [];
+
+      nodeLayout.forEach((node, index) => {
+        const dept = state.departments.find(d => d.id === node.id);
+        const floatY = Math.sin(orbRotation * 2 + index) * 4;
+        const nx = cx + node.rx * spreadX;
+        const ny = cy + node.ry * spreadY + floatY;
+
+        // Conduit line from center orb to node
+        ctx.strokeStyle = dept && dept.active ? `${node.color}44` : 'rgba(100,116,139,0.18)';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(nx, ny);
+        ctx.stroke();
+
+        // Glowing Orb Satellite
+        const satGrad = ctx.createRadialGradient(nx, ny, 1, nx, ny, 18);
+        satGrad.addColorStop(0, node.color);
+        satGrad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = satGrad;
+        ctx.beginPath();
+        ctx.arc(nx, ny, 18, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = dept && dept.active ? node.color : '#475569';
+        ctx.beginPath();
+        ctx.arc(nx, ny, 5.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Pill Label Badge (Matches Screenshot 2 aesthetic)
+        const pillText = node.label;
+        ctx.font = '600 10px "JetBrains Mono", monospace';
+        const textW = ctx.measureText(pillText).width;
+        const pillW = textW + 28;
+        const pillH = 24;
+        const pillX = nx - pillW / 2;
+        const pillY = ny - 32;
+
+        // Pill Background
+        ctx.fillStyle = 'rgba(11, 15, 25, 0.92)';
+        ctx.strokeStyle = dept && dept.active ? `${node.color}88` : '#334155';
+        ctx.lineWidth = 1;
+        roundRect(ctx, pillX, pillY, pillW, pillH, 12);
+        ctx.fill();
+        ctx.stroke();
+
+        // Status Dot inside pill
+        ctx.fillStyle = dept && dept.active ? node.color : '#64748b';
+        ctx.beginPath();
+        ctx.arc(pillX + 11, pillY + pillH / 2, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Pill Text
+        ctx.fillStyle = '#e2e8f0';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(pillText, pillX + 19, pillY + pillH / 2 + 0.5);
+
+        renderedNodeHitboxes.push({
+          id: node.id,
+          x: Math.min(pillX, nx - 18),
+          y: pillY,
+          w: Math.max(pillW, 36),
+          h: 52
+        });
+      });
+
+      // 3. Draw Data Pulses traveling along conduits
+      activePulses = activePulses.filter(p => p.progress < 1);
+      activePulses.forEach(p => {
+        p.progress += p.speed;
+        const node = nodeLayout.find(n => n.id === p.deptId);
+        if (!node) return;
+        const nx = cx + node.rx * spreadX;
+        const ny = cy + node.ry * spreadY;
+        const px = cx + (nx - cx) * p.progress;
+        const py = cy + (ny - cy) * p.progress;
+
+        ctx.fillStyle = p.color;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 12;
+        ctx.beginPath();
+        ctx.arc(px, py, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      });
+
+      // 4. Draw Rotating 3D Wireframe Geodesic Core Orb
+      orbRotation += 0.008;
+      const cosA = Math.cos(orbRotation);
+      const sinA = Math.sin(orbRotation);
+
+      const projected = sphereVertices.map(v => {
+        const x1 = v.x * cosA - v.z * sinA;
+        const z1 = v.z * cosA + v.x * sinA;
+        return {
+          x: cx + x1 * orbRadius,
+          y: cy + v.y * orbRadius,
+          z: z1
+        };
+      });
+
+      ctx.strokeStyle = 'rgba(0, 240, 255, 0.35)';
+      ctx.lineWidth = 0.9;
+      for (let i = 0; i < projected.length; i++) {
+        for (let j = i + 1; j < projected.length; j++) {
+          const dx = projected[i].x - projected[j].x;
+          const dy = projected[i].y - projected[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < orbRadius * 0.56) {
+            ctx.beginPath();
+            ctx.moveTo(projected[i].x, projected[i].y);
+            ctx.lineTo(projected[j].x, projected[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      projected.forEach(pt => {
+        ctx.fillStyle = pt.z > 0 ? '#00f0ff' : 'rgba(0, 240, 255, 0.25)';
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, pt.z > 0 ? 2 : 1.2, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Central SUPPORT / CORE Badge inside the wireframe sphere
+      ctx.font = '700 10px "JetBrains Mono", monospace';
+      ctx.fillStyle = '#a5f3fc';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('SUPPORT • CORE', cx, cy);
+
+      requestAnimationFrame(drawNeuralNetwork);
+    }
+
+    function roundRect(ctx, x, y, width, height, radius) {
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + width - radius, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+      ctx.lineTo(x + width, y + height - radius);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      ctx.lineTo(x + radius, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+    }
+
+    // Canvas Click / Tap Interaction
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const clickY = e.clientY - rect.top;
+
+      for (const box of renderedNodeHitboxes) {
+        if (clickX >= box.x && clickX <= box.x + box.w && clickY >= box.y && clickY <= box.y + box.h) {
+          runSingleAgentCycle(box.id);
+          return;
+        }
+      }
+
+      // Clicking center orb triggers full pulse
+      const cx = canvasW / 2;
+      const cy = canvasH / 2 + 8;
+      if (Math.hypot(clickX - cx, clickY - cy) < 65) {
+        triggerNetworkPulse();
+      }
+    });
+
+    // Periodic ambient pulses so the network feels alive
+    setInterval(() => {
+      if (state.activeTab === 'home' && state.visualizerMode === 'neural') {
+        const active = state.departments.filter(d => d.active);
+        if (active.length > 0) {
+          const rand = active[Math.floor(Math.random() * active.length)];
+          spawnPulseForDept(rand.id);
+        }
+      }
+    }, 1600);
+
+    window.addEventListener('resize', () => {
+      if (state.visualizerMode === 'neural') resizeNeuralCanvas();
+    });
+
+    // ==================== INITIALIZATION ====================
+    window.onload = function () {
+      renderAll();
+      setVisualizerMode(state.visualizerMode || 'neural');
+      switchTab(state.activeTab || 'home');
+      resizeNeuralCanvas();
+      drawNeuralNetwork();
+    };
+  </script>
+</body>
+</html>
